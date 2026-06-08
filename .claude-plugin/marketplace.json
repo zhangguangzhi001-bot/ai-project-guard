@@ -1,0 +1,22 @@
+{
+  "name": "ai-project-guard-dev",
+  "description": "Development marketplace for AI Project Guard — initialize AI governance files safely in legacy projects",
+  "owner": {
+    "name": "AI Project Guard Contributors"
+  },
+  "plugins": [
+    {
+      "name": "ai-project-guard",
+      "description": "Generate CLAUDE.md, architecture boundaries, dangerous-module lists, and risk-tiered workflows so Claude Code respects legacy project constraints.",
+      "version": "0.1.0",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/zhangguangzhi001-bot/ai-project-guard"
+      },
+      "strict": true,
+      "author": {
+        "name": "AI Project Guard Contributors"
+      }
+    }
+  ]
+}

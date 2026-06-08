@@ -2,47 +2,113 @@
 
 Make legacy codebases governable by AI coding agents.
 
-AI Project Guard initializes project-specific AI governance files so Claude Code can understand architecture boundaries, dangerous modules, historical lessons, verification rules, and human review points before changing code.
+AI Project Guard gives AI coding agents project-specific context, architecture boundaries, dangerous-module guards, historical lessons, and risk-tiered workflows so they can work safely inside existing codebases.
 
-## Status
+## Installation
 
-This repository is implementing the v0.1 MVP from `ai-project-guard-prd.md`.
+Installation differs by harness. If you use more than one, install AI Project Guard separately for each one.
 
-Implemented scope is intentionally narrow:
+### Claude Code
 
-- `init` command.
-- Claude Code profile.
-- Interactive project knowledge collection.
-- Generation of `CLAUDE*.md` and `.claude/*` governance files.
-- `--dry-run`.
-- No silent overwrite unless `--force` is explicit.
+AI Project Guard is available as a Claude Code plugin.
 
-Planned later:
+**Install from marketplace:**
 
-- `scan`.
-- `validate`.
-- `doctor`.
-- `local`.
-- Multiple AI tool targets.
-- Custom templates.
+Register the marketplace:
 
-## Quick start
-
-```bash
-npm install
-npm run dev -- init --profile claude-code --dry-run
-npm run dev -- init --profile claude-code --output ./target-project
+```text
+/plugin marketplace add zhangguangzhi001-bot/ai-project-guard-marketplace
 ```
 
-After publishing, the intended usage is:
+Install the plugin:
 
-```bash
-npx ai-project-guard init --profile claude-code
+```text
+/plugin install ai-project-guard@ai-project-guard-marketplace
 ```
 
-## Generated files
+**Install directly from GitHub:**
 
-The Claude Code profile generates:
+```text
+/plugin install zhangguangzhi001-bot/ai-project-guard
+```
+
+**Install via npm (CLI):**
+
+```bash
+npm install -g github:zhangguangzhi001-bot/ai-project-guard
+cd your-legacy-project
+ai-project-guard init --profile claude-code
+```
+
+### Cursor
+
+In Cursor Agent chat, install from source:
+
+```text
+/add-plugin zhangguangzhi001-bot/ai-project-guard
+```
+
+Or search for "ai-project-guard" in the plugin marketplace.
+
+### Gemini CLI
+
+Install the extension:
+
+```bash
+gemini extensions install https://github.com/zhangguangzhi001-bot/ai-project-guard
+```
+
+Update later:
+
+```bash
+gemini extensions update ai-project-guard
+```
+
+### Codex CLI
+
+Register the marketplace:
+
+```text
+/plugin marketplace add zhangguangzhi001-bot/ai-project-guard-marketplace
+```
+
+Install the plugin:
+
+```text
+/plugin install ai-project-guard@ai-project-guard-marketplace
+```
+
+### GitHub Copilot CLI
+
+Register the marketplace:
+
+```bash
+copilot plugin marketplace add zhangguangzhi001-bot/ai-project-guard-marketplace
+```
+
+Install the plugin:
+
+```bash
+copilot plugin install ai-project-guard@ai-project-guard-marketplace
+```
+
+### Factory Droid
+
+Register the marketplace:
+
+```bash
+droid plugin marketplace add https://github.com/zhangguangzhi001-bot/ai-project-guard
+```
+
+Install the plugin:
+
+```bash
+droid plugin install ai-project-guard@ai-project-guard
+```
+
+## What it does
+
+Once installed, AI Project Guard provides skills and commands to initialize AI governance files in any project:
 
 ```text
 CLAUDE.md
@@ -70,17 +136,37 @@ CLAUDE.local.md
 .claude/workflows/workflow-requirement-clarify.md
 ```
 
-## Safety behavior
+## Skills
 
-- `--dry-run` prints the generated file plan and writes nothing.
-- Existing generated files block writes unless `--force` is passed.
-- Generated paths are restricted to root `CLAUDE*.md` files and `.claude/agents`, `.claude/commands`, `.claude/workflows` Markdown files.
-- The CLI does not modify target business code.
-- Prompts ask for names of sensitive fields/systems only, not real secret values.
+When installed as a Claude Code plugin, these skills are available:
 
-## Development commands
+| Skill | Trigger | What it does |
+|-------|---------|-------------|
+| `init-guard` | `/init-guard` or "initialize governance" | Interactive project scan and governance file generation |
+| `scan-guard` | `/scan-guard` or "scan for risk" | Read-only project risk scan — reports dangerous modules, legacy code, contracts |
+| `validate-guard` | `/validate-guard` or "check governance quality" | Validates existing governance files for completeness and security |
+
+## Why
+
+AI coding agents are powerful, but legacy projects are full of hidden rules:
+
+- deprecated modules that must not be deleted
+- status strings shared by database, backend, frontend, and tests
+- placeholder tests that give false confidence
+- external API quirks that look like bugs
+- old and new business flows living side by side
+- security/config assumptions that are not obvious from code
+
+AI Project Guard helps teams encode those rules into AI-readable governance files.
+
+## Privacy
+
+All scanning is local by default. No code is uploaded. Secrets are never written into generated files.
+
+## Development
 
 ```bash
+npm install
 npm run build
 npm run dev -- init --profile claude-code --dry-run
 npm run typecheck
@@ -95,11 +181,3 @@ Run one test file:
 ```bash
 npm test -- tests/generators/claude-generator.test.ts
 ```
-
-## Privacy
-
-AI Project Guard is local-first. The MVP does not upload code, send telemetry, or call external analysis services.
-
-## Limitations
-
-The v0.1 MVP does not perform deep code scanning, AST analysis, intelligent merging, or multi-tool configuration generation. Generated governance files improve AI context but do not replace human review for high-risk changes.
