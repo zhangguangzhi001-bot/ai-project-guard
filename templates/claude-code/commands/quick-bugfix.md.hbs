@@ -1,0 +1,22 @@
+# /quick-bugfix
+
+## Purpose
+
+Handle Tier 0-1 bugs with a minimal fix.
+
+## Allowed scope
+
+- Single-file or tightly scoped fix.
+- No API/data/auth/external/legacy contract changes.
+- No dangerous modules: {{inlineList risks.dangerousModules}}.
+
+## Steps
+
+1. State root cause.
+2. Apply the smallest fix.
+3. Run focused verification: {{inlineList tests.testCommands}}.
+4. Report what was tested.
+
+## Stop conditions
+
+Escalate to `/risky-plan` if the task touches contracts, migrations, external systems, or legacy modules.

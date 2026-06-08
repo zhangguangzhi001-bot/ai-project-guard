@@ -1,0 +1,61 @@
+# CLAUDE.architecture.md
+
+Stable architecture context for {{projectName}}.
+
+## System architecture
+
+{{projectSummary}}
+
+## Runtime entry points
+
+{{list architecture.runtimeEntryPoints}}
+
+## Core business flow
+
+{{architecture.coreBusinessFlow}}
+
+## Main path
+
+{{architecture.mainPath}}
+
+## Legacy / compatibility path
+
+{{architecture.legacyPath}}
+
+## Module boundaries
+
+{{list architecture.moduleBoundaries}}
+
+## External systems
+
+{{list architecture.externalSystems}}
+
+## Data and API contracts
+
+- API: {{inlineList contracts.apiContracts}}
+- Status: {{inlineList contracts.statusContracts}}
+- Schema: {{inlineList contracts.schemaContracts}}
+- Frontend: {{inlineList contracts.frontendContracts}}
+- External: {{inlineList contracts.externalContracts}}
+
+## Dangerous modules
+
+{{list risks.dangerousModules}}
+
+## Historical compatibility layers
+
+{{list risks.legacyModules}}
+
+## Non-crossable boundaries
+
+{{list architecture.moduleBoundaries}}
+
+## Areas AI is likely to mis-edit
+
+- Legacy/deprecated modules that still have hidden callers.
+- Status strings or API envelopes shared across storage, backend, frontend, and tests.
+- Manual SQL, migrations, generated API types, and external integration quirks.
+
+## Must-have human review
+
+{{list risks.humanReviewRequired}}

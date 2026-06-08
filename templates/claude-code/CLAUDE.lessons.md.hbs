@@ -1,0 +1,48 @@
+# CLAUDE.lessons.md
+
+Historical lessons and AI mis-edit risks for {{projectName}}.
+
+## Lesson 1: Do not delete legacy or deprecated modules casually
+
+- 问题：Legacy code may still have hidden callers or compatibility obligations.
+- 原因：Old and new paths can coexist in long-lived projects.
+- 实际背景：{{architecture.legacyPath}}
+- 风险：Deleting or simplifying compatibility code can break production users.
+- 规则：Treat legacy modules as protected unless a human confirms deletion.
+- 正确做法：Trace callers, document impact, and ask for review before removal.
+
+## Lesson 2: Do not rename shared status strings casually
+
+- 问题：Status strings may be stored in DB rows and reused by backend, frontend, tests, and reports.
+- 原因：A rename that compiles can still break historical data and external consumers.
+- 实际背景：{{inlineList contracts.statusContracts}}
+- 风险：Runtime failures, incorrect UI states, or broken migrations.
+- 规则：Preserve status contracts unless migration and compatibility are planned.
+- 正确做法：Identify all consumers and add compatibility handling before changing values.
+
+## Lesson 3: Do not change API envelopes or DTO/VO shapes locally
+
+- 问题：Backend response shapes and frontend API types are coupled.
+- 原因：Frontend clients may depend on exact envelopes, prefixes, and field names.
+- 实际背景：{{inlineList contracts.apiContracts}}
+- 风险：Frontend failures despite backend tests passing.
+- 规则：Any API contract change is at least Tier 2.
+- 正确做法：Update backend, frontend types, API clients, and tests together.
+
+## Lesson 4: Do not trust placeholder tests as proof
+
+- 问题：Some tests may be placeholders or incomplete.
+- 原因：Passing tests do not always cover real production behavior.
+- 实际背景：{{inlineList tests.invalidOrPlaceholderTests}}
+- 风险：False confidence after unsafe edits.
+- 规则：Use focused verification and inspect test meaning.
+- 正确做法：Run real commands and explain what they prove and do not prove.
+
+## Lesson 5: Do not log or persist sensitive values
+
+- 问题：Tokens, signed URLs, access keys, private keys, and model responses may contain secrets.
+- 原因：Logs and generated files can be copied or committed.
+- 实际背景：{{inlineList architecture.externalSystems}}
+- 风险：Credential leakage or privacy incidents.
+- 规则：Mention sensitive fields only by name/location and mask values.
+- 正确做法：Redact values before output and avoid asking users for secrets.

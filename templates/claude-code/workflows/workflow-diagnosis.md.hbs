@@ -1,0 +1,11 @@
+# workflow-diagnosis
+
+Use this when the cause is unclear.
+
+1. Read the project context files.
+2. Gather evidence before editing.
+3. Trace from runtime entry points: {{inlineList architecture.runtimeEntryPoints}}.
+4. Check whether the issue touches contracts or dangerous modules.
+5. Output root-cause hypotheses and recommended next step.
+
+Stop before editing if root cause is uncertain or the task is Tier 3.

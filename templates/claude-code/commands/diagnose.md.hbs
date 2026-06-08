@@ -1,0 +1,16 @@
+# /diagnose
+
+## Purpose
+
+Diagnose an unclear bug or behavior before editing code.
+
+## Steps
+
+1. Reproduce or narrow the issue.
+2. Trace the call path from runtime entry points: {{inlineList architecture.runtimeEntryPoints}}.
+3. Check contracts and dangerous modules before proposing edits.
+4. Output root-cause hypotheses, evidence, and the safest next step.
+
+## Stop conditions
+
+Do not edit when the issue touches Tier 3 areas or the root cause is unproven.

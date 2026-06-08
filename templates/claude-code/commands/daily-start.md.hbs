@@ -1,0 +1,16 @@
+# /daily-start
+
+## Purpose
+
+Load project context for {{projectName}}, identify current risk tier, and decide the correct workflow before coding.
+
+## Steps
+
+1. Read `CLAUDE.md`, `CLAUDE.architecture.md`, `CLAUDE.lessons.md`, and `CLAUDE.local.md`.
+2. Identify whether the task touches dangerous modules: {{inlineList risks.dangerousModules}}.
+3. Identify whether the task changes contracts: {{inlineList contracts.apiContracts}}.
+4. Route to the correct workflow in `.claude/workflows/README.md`.
+
+## Stop conditions
+
+Stop and request clarification when the task is vague, touches Tier 3 areas, or requires human review: {{inlineList risks.humanReviewRequired}}.

@@ -1,0 +1,21 @@
+# /verify
+
+## Purpose
+
+Run focused verification for {{projectName}}.
+
+## Commands
+
+Build/typecheck/lint:
+
+{{list tests.buildCommands}}
+
+Tests:
+
+{{list tests.testCommands}}
+
+## Rules
+
+- Explain what each command proves.
+- Do not treat placeholder tests as proof: {{inlineList tests.invalidOrPlaceholderTests}}.
+- If verification cannot run, report why and what manual check is needed.

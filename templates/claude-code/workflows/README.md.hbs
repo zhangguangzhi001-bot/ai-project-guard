@@ -1,0 +1,32 @@
+# Claude Code workflows
+
+Use these workflows for {{projectName}}.
+
+## Tier routing
+
+- Tier 0: docs, comments, copy, or non-logic style changes.
+- Tier 1: low-risk bug fixes outside contracts and dangerous modules.
+- Tier 2: API, DTO/VO, TypeScript types, repositories/mappers, query/write behavior, response shapes.
+- Tier 3: dangerous modules, external systems, state machines, migrations, legacy/compatibility layers, auth/security, high-coupling areas.
+
+## Contract Guard
+
+Preserve:
+
+{{list contracts.apiContracts}}
+{{list contracts.statusContracts}}
+{{list contracts.schemaContracts}}
+{{list contracts.frontendContracts}}
+{{list contracts.externalContracts}}
+
+## Dangerous modules
+
+{{list risks.dangerousModules}}
+
+## Workflow files
+
+- `workflow-diagnosis.md`
+- `workflow-bugfix.md`
+- `workflow-new-feature.md`
+- `workflow-dangerous-module.md`
+- `workflow-requirement-clarify.md`

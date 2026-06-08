@@ -1,0 +1,23 @@
+# /risky-plan
+
+## Purpose
+
+Plan before changing Tier 2-3 areas in {{projectName}}.
+
+## Applies to
+
+- Dangerous modules: {{inlineList risks.dangerousModules}}
+- Legacy modules: {{inlineList risks.legacyModules}}
+- API/status/schema/frontend/external contracts.
+- Human-review areas: {{inlineList risks.humanReviewRequired}}
+
+## Steps
+
+1. Read all `CLAUDE*.md` files.
+2. Trace affected call chains and contracts.
+3. Identify verification commands.
+4. Produce an implementation plan and wait for approval before editing.
+
+## Stop conditions
+
+Do not implement before approval.
