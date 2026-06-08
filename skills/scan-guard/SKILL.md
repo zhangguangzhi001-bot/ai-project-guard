@@ -1,15 +1,17 @@
 ---
 name: scan-guard
-description: Use when the user wants to scan a project for dangerous modules, legacy code, missing governance files, or security risks without generating files. Triggers on "scan guard", "scan project for risk", "audit governance", "check dangerous modules", or "/scan-guard".
+description: Use when the user wants to inspect a project for dangerous modules, legacy code, missing governance files, or contract risks before running AI Project Guard init. Triggers on "scan guard", "scan project for risk", "audit governance", or "/scan-guard".
 ---
 
 # Scan Guard
 
-Scan the current project for governance risks, dangerous module candidates, legacy modules, contract candidates, and missing governance files. Report only — do not generate files.
+Perform a read-only governance risk scan before initialization.
+
+This skill is a Claude Code workflow guide. As the CLI matures, prefer the CLI's `scan` command when available. Until then, this skill helps Claude Code gather advisory information safely.
 
 ## When to Use
 
-- User wants a risk overview before initializing governance files.
+- User wants a risk overview before running `ai-project-guard init`.
 - User asks for "扫描项目风险", "audit project", "check governance", "scan guard".
 - User runs `/scan-guard`.
 
@@ -23,7 +25,7 @@ Walk the project root and report:
 - Framework indicators (Spring, Vue, React, Django, Express, etc.)
 - Test framework indicators
 - Database migration tool indicators
-- Existing governance files (CLAUDE.md, .claude/, .cursor/rules/, etc.)
+- Existing governance files (`CLAUDE.md`, `.claude/`, `.cursor/rules/`, etc.)
 
 ### Step 2: Dangerous module candidates
 
@@ -74,15 +76,20 @@ CLAUDE.local.md        [EXISTS / MISSING]
 
 Produce a scan report with sections:
 
-1. Detected stack (with confidence: high/medium/low)
+1. Detected stack (confidence: high/medium/low)
 2. Dangerous module candidates
 3. Legacy module candidates
 4. Contract candidates
 5. Governance file status
-6. Suggested questions for the user to answer during `/init-guard`
+6. Suggested answers to prepare for `ai-project-guard init`
+7. Recommended CLI command:
+
+```bash
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --dry-run
+```
 
 ## Important Rules
 
-- **Never print real secret values.** If a config file contains secrets, report the field name and file only.
-- **Mark all findings with confidence.** Do not claim certainty where only heuristics were used.
-- **This is read-only.** Do not write or modify any files.
+- Never print real secret values. If a config file contains secrets, report field/file only.
+- Mark all findings with confidence.
+- This is read-only. Do not write or modify files.

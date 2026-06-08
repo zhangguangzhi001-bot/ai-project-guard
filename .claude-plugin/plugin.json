@@ -1,6 +1,6 @@
 {
   "name": "ai-project-guard",
-  "description": "Initialize AI coding governance files for legacy projects — generate CLAUDE.md, dangerous-module guards, architecture context, and risk-based workflows so AI coding agents understand project boundaries before editing code.",
+  "description": "CLI-first project governance toolkit for legacy codebases. Provides Claude Code skills that guide use of the AI Project Guard CLI to initialize CLAUDE.md, architecture context, dangerous-module guards, lessons, and risk-based workflows.",
   "version": "0.1.0",
   "author": {
     "name": "AI Project Guard Contributors"
