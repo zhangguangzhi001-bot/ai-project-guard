@@ -19,8 +19,13 @@ program
   .option('--force', 'overwrite existing generated governance files', false)
   .option('--answers <file>', 'non-interactive JSON answers file')
   .option(
+    '--interactive',
+    'ask the quick questionnaire instead of auto-generating from scan',
+    false,
+  )
+  .option(
     '--full',
-    'ask the full governance questionnaire instead of the default quick questionnaire',
+    'ask the full governance questionnaire instead of auto-generating from scan',
     false,
   )
   .option('--no-scan', 'skip lightweight local metadata suggestions')

@@ -6,6 +6,7 @@ import {
   loadProjectProfileFromAnswers,
 } from '../prompts/answers-profile.js'
 import { collectProjectProfile as defaultCollectProjectProfile } from '../prompts/init-prompts.js'
+import { createScannedProjectProfile } from '../scanners/light-scan.js'
 import type { ProjectProfile } from '../schemas/project-profile.js'
 import {
   findConflicts as defaultFindConflicts,
@@ -21,6 +22,7 @@ export interface InitOptions {
   scan: boolean
   answers?: string
   full?: boolean
+  interactive?: boolean
 }
 
 export interface InitDependencies {
@@ -88,11 +90,15 @@ async function resolveProfile(
     return loadProjectProfileFromAnswers(outputDir, options.answers)
   }
 
-  if (options.dryRun) {
+  if (options.interactive || options.full) {
+    return collectProjectProfile(outputDir, { full: options.full })
+  }
+
+  if (options.scan === false) {
     return createDefaultProjectProfile(outputDir)
   }
 
-  return collectProjectProfile(outputDir, { full: options.full })
+  return createScannedProjectProfile(outputDir)
 }
 
 function printDryRun(outputDir: string, files: string[], conflicts: string[]): void {

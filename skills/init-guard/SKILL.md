@@ -69,7 +69,13 @@ If the user approves, run:
 npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code
 ```
 
-By default, the CLI asks a short quick questionnaire:
+By default, the CLI auto-scans the current project and does not ask questions. If the user wants to manually supplement key context, run:
+
+```bash
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --interactive
+```
+
+`--interactive` asks a short questionnaire:
 
 1. Project name
 2. Project summary
