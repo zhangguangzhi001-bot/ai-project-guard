@@ -54,9 +54,9 @@ describe('generateClaudeCodePlan', () => {
     const paths = plan.files.map((file) => file.relativePath)
 
     expect(paths).toEqual(CLAUDE_CODE_OUTPUT_FILES)
-    expect(paths).toContain('.claude/commands/daily-review.md')
-    expect(paths).toContain('.claude/commands/requirement-clarify.md')
-    expect(paths).toContain('.claude/workflows/workflow-requirement-clarify.md')
+    expect(paths).toContain('.claude/commands/apg-daily-review.md')
+    expect(paths).toContain('.claude/commands/apg-requirement-clarify.md')
+    expect(paths).toContain('.claude/workflows/apg-workflow-requirement-clarify.md')
   })
 
   it('renders project-specific governance content', async () => {

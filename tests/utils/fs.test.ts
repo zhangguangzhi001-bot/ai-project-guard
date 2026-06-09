@@ -20,7 +20,7 @@ function samplePlan(): WritePlan {
   return {
     files: [
       { relativePath: 'CLAUDE.md', content: '# CLAUDE.md\n' },
-      { relativePath: '.claude/agents/code-reviewer.md', content: '# code-reviewer\n' },
+      { relativePath: '.claude/agents/apg-code-reviewer.md', content: '# apg-code-reviewer\n' },
     ],
   }
 }
@@ -29,7 +29,7 @@ describe('writePlan', () => {
   it('writes allowed governance files', async () => {
     const result = await writePlan(tempDir, samplePlan(), { force: false })
 
-    expect(result.written).toEqual(['CLAUDE.md', '.claude/agents/code-reviewer.md'])
+    expect(result.written).toEqual(['CLAUDE.md', '.claude/agents/apg-code-reviewer.md'])
     await expect(fs.readFile(path.join(tempDir, 'CLAUDE.md'), 'utf8')).resolves.toContain('CLAUDE')
   })
 

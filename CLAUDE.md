@@ -112,7 +112,7 @@ Default planned agents:
 - `refactor-guardian` — read-only guard against over-refactoring and compatibility deletion.
 - `lessons-curator` — suggest lessons after development.
 
-Default planned commands include `/daily-start`, `/daily-review`, `/diagnose`, `/quick-bugfix`, `/risky-plan`, `/verify`, and `/requirement-clarify`.
+Default planned commands include `/apg-daily-start`, `/apg-daily-review`, `/apg-diagnose`, `/apg-quick-bugfix`, `/apg-risky-plan`, `/apg-verify`, and `/apg-requirement-clarify`.
 
 ## Risk model and workflow tiers
 
