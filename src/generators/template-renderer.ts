@@ -6,15 +6,22 @@ import type { TemplateContext } from '../schemas/template-context.js'
 
 Handlebars.registerHelper('list', (items: string[] | undefined) => {
   const values = items && items.length > 0 ? items : ['TODO: human review required']
-  return new Handlebars.SafeString(values.map((item) => `- ${Handlebars.escapeExpression(item)}`).join('\n'))
+  return new Handlebars.SafeString(
+    values.map((item) => `- ${Handlebars.escapeExpression(item)}`).join('\n'),
+  )
 })
 
 Handlebars.registerHelper('inlineList', (items: string[] | undefined) => {
   const values = items && items.length > 0 ? items : ['TODO: human review required']
-  return new Handlebars.SafeString(values.map((item) => Handlebars.escapeExpression(item)).join(', '))
+  return new Handlebars.SafeString(
+    values.map((item) => Handlebars.escapeExpression(item)).join(', '),
+  )
 })
 
-export async function renderTemplate(templatePath: string, context: TemplateContext): Promise<string> {
+export async function renderTemplate(
+  templatePath: string,
+  context: TemplateContext,
+): Promise<string> {
   const source = await fs.readFile(templatePath, 'utf8')
   const template = Handlebars.compile(source, { noEscape: false })
   return template(context)

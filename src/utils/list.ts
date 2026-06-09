@@ -1,4 +1,5 @@
-const SECRET_VALUE_PATTERN = /((?:password|passwd|secret|token|accessKeySecret|access_key_secret|privateKey|private_key|apiKey|api_key)\s*[:=]\s*)[^\s,;]+|(sk-[a-z0-9_-]{12,}|[A-Za-z0-9+/]{64,}={0,2})/gi
+const SECRET_VALUE_PATTERN =
+  /((?:password|passwd|secret|token|accessKeySecret|access_key_secret|privateKey|private_key|apiKey|api_key)\s*[:=]\s*)[^\s,;]+|(sk-[a-z0-9_-]{12,}|[A-Za-z0-9+/]{64,}={0,2})/gi
 
 export function parseList(value: string | string[] | undefined): string[] {
   if (Array.isArray(value)) {
@@ -15,7 +16,10 @@ export function parseList(value: string | string[] | undefined): string[] {
     .filter(Boolean)
 }
 
-export function withTodoIfEmpty(items: string[], todoText = 'TODO: human review required'): string[] {
+export function withTodoIfEmpty(
+  items: string[],
+  todoText = 'TODO: human review required',
+): string[] {
   return items.length > 0 ? items : [todoText]
 }
 

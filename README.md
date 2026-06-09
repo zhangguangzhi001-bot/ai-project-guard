@@ -20,6 +20,17 @@ Preview without writing files:
 npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --dry-run
 ```
 
+Run non-interactively with an answers file, useful for CI or repeatable initialization:
+
+```bash
+npx github:zhangguangzhi001-bot/ai-project-guard init \
+  --profile claude-code \
+  --answers ./answers.json \
+  --dry-run
+```
+
+See `examples/claude-code-basic/answers.example.json` for the supported fields.
+
 Or install globally from GitHub:
 
 ```bash

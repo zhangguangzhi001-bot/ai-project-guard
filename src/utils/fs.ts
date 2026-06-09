@@ -30,7 +30,11 @@ export async function findConflicts(outputDir: string, plan: WritePlan): Promise
   return conflicts
 }
 
-export async function writePlan(outputDir: string, plan: WritePlan, options: { force: boolean }): Promise<WriteResult> {
+export async function writePlan(
+  outputDir: string,
+  plan: WritePlan,
+  options: { force: boolean },
+): Promise<WriteResult> {
   for (const file of plan.files) {
     resolveInsideOutput(outputDir, file.relativePath)
   }

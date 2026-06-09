@@ -1,9 +1,13 @@
 import path from 'node:path'
 import { generateClaudeCodePlan as defaultGenerateClaudeCodePlan } from '../generators/index.js'
 import type { WritePlan } from '../generators/write-plan.js'
+import { loadProjectProfileFromAnswers } from '../prompts/answers-profile.js'
 import { collectProjectProfile as defaultCollectProjectProfile } from '../prompts/init-prompts.js'
 import type { ProjectProfile } from '../schemas/project-profile.js'
-import { findConflicts as defaultFindConflicts, writePlan as defaultWritePlan } from '../utils/fs.js'
+import {
+  findConflicts as defaultFindConflicts,
+  writePlan as defaultWritePlan,
+} from '../utils/fs.js'
 import { logger } from '../utils/logger.js'
 
 export interface InitOptions {
@@ -12,6 +16,7 @@ export interface InitOptions {
   dryRun: boolean
   force: boolean
   scan: boolean
+  answers?: string
 }
 
 export interface InitDependencies {
@@ -25,7 +30,10 @@ export interface InitDependencies {
   ) => Promise<{ written: string[]; conflicts: string[] }>
 }
 
-export async function runInitCommand(options: InitOptions, dependencies: InitDependencies = {}): Promise<void> {
+export async function runInitCommand(
+  options: InitOptions,
+  dependencies: InitDependencies = {},
+): Promise<void> {
   if (options.profile !== 'claude-code') {
     throw new Error(
       `Profile "${options.profile}" is planned but not implemented in v0.1. Use --profile claude-code.`,
@@ -33,17 +41,24 @@ export async function runInitCommand(options: InitOptions, dependencies: InitDep
   }
 
   const collectProjectProfile = dependencies.collectProjectProfile ?? defaultCollectProjectProfile
-  const generateClaudeCodePlan = dependencies.generateClaudeCodePlan ?? defaultGenerateClaudeCodePlan
+  const generateClaudeCodePlan =
+    dependencies.generateClaudeCodePlan ?? defaultGenerateClaudeCodePlan
   const findConflicts = dependencies.findConflicts ?? defaultFindConflicts
   const persistWritePlan = dependencies.writePlan ?? defaultWritePlan
 
   const outputDir = path.resolve(options.output)
-  const profile = await collectProjectProfile(outputDir)
+  const profile = options.answers
+    ? await loadProjectProfileFromAnswers(outputDir, options.answers)
+    : await collectProjectProfile(outputDir)
   const plan = await generateClaudeCodePlan(profile)
 
   if (options.dryRun) {
     const conflicts = await findConflicts(outputDir, plan)
-    printDryRun(outputDir, plan.files.map((file) => file.relativePath), conflicts)
+    printDryRun(
+      outputDir,
+      plan.files.map((file) => file.relativePath),
+      conflicts,
+    )
     return
   }
 

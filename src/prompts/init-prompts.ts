@@ -1,9 +1,18 @@
 import path from 'node:path'
 import { input } from '@inquirer/prompts'
-import type { ArchitectureProfile, ProjectProfile, TestProfile } from '../schemas/project-profile.js'
-import { maskListSecretLikeValues, maskSecretLikeValues, parseList, withTodoIfEmpty } from '../utils/list.js'
-import { collectContracts, collectRisks } from './risk-prompts.js'
+import type {
+  ArchitectureProfile,
+  ProjectProfile,
+  TestProfile,
+} from '../schemas/project-profile.js'
+import {
+  maskListSecretLikeValues,
+  maskSecretLikeValues,
+  parseList,
+  withTodoIfEmpty,
+} from '../utils/list.js'
 import { collectLocalContext } from './local-prompts.js'
+import { collectContracts, collectRisks } from './risk-prompts.js'
 
 export async function collectProjectProfile(rootDir: string): Promise<ProjectProfile> {
   const projectName = await input({
@@ -64,7 +73,9 @@ async function collectArchitectureProfile(): Promise<ArchitectureProfile> {
   )
 
   return {
-    coreBusinessFlow: maskSecretLikeValues(coreBusinessFlow.trim() || 'TODO: human review required'),
+    coreBusinessFlow: maskSecretLikeValues(
+      coreBusinessFlow.trim() || 'TODO: human review required',
+    ),
     mainPath: maskSecretLikeValues(mainPath.trim() || 'TODO: human review required'),
     legacyPath: maskSecretLikeValues(legacyPath.trim() || 'TODO: human review required'),
     runtimeEntryPoints: withTodoIfEmpty(maskListSecretLikeValues(runtimeEntryPoints)),

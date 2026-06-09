@@ -29,6 +29,12 @@ For preview-only mode:
 npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --dry-run
 ```
 
+For repeatable/non-interactive initialization, prepare an answers JSON file and run:
+
+```bash
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --answers ./answers.json --dry-run
+```
+
 If the CLI is already installed globally:
 
 ```bash

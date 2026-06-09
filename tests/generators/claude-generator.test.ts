@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { CLAUDE_CODE_OUTPUT_FILES, generateClaudeCodePlan } from '../../src/generators/claude-generator.js'
+import {
+  CLAUDE_CODE_OUTPUT_FILES,
+  generateClaudeCodePlan,
+} from '../../src/generators/claude-generator.js'
 import type { ProjectProfile } from '../../src/schemas/project-profile.js'
 
 function sampleProfile(): ProjectProfile {

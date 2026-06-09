@@ -8,5 +8,14 @@
   "homepage": "https://github.com/zhangguangzhi001-bot/ai-project-guard",
   "repository": "https://github.com/zhangguangzhi001-bot/ai-project-guard",
   "license": "MIT",
-  "keywords": ["governance", "guardrails", "legacy", "claude-code", "skills", "project-init", "dangerous-modules", "contract-guard"]
+  "keywords": [
+    "governance",
+    "guardrails",
+    "legacy",
+    "claude-code",
+    "skills",
+    "project-init",
+    "dangerous-modules",
+    "contract-guard"
+  ]
 }

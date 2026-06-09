@@ -16,7 +16,11 @@ export function normalizeRelativePath(relativePath: string): string {
 export function assertAllowedGeneratedPath(relativePath: string): void {
   const normalized = normalizeRelativePath(relativePath)
 
-  if (path.isAbsolute(relativePath) || normalized.startsWith('../') || normalized.includes('/../')) {
+  if (
+    path.isAbsolute(relativePath) ||
+    normalized.startsWith('../') ||
+    normalized.includes('/../')
+  ) {
     throw new Error(`Generated path escapes output directory: ${relativePath}`)
   }
 
@@ -24,7 +28,10 @@ export function assertAllowedGeneratedPath(relativePath: string): void {
     return
   }
 
-  if (ALLOWED_PREFIXES.some((prefix) => normalized.startsWith(prefix)) && normalized.endsWith('.md')) {
+  if (
+    ALLOWED_PREFIXES.some((prefix) => normalized.startsWith(prefix)) &&
+    normalized.endsWith('.md')
+  ) {
     return
   }
 

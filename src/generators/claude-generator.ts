@@ -1,16 +1,22 @@
 import path from 'node:path'
 import type { ProjectProfile } from '../schemas/project-profile.js'
 import { toTemplateContext } from '../schemas/template-context.js'
-import type { WritePlan } from './write-plan.js'
 import { renderTemplate, resolveTemplateRoot } from './template-renderer.js'
+import type { WritePlan } from './write-plan.js'
 
 const TEMPLATE_FILES: Array<{ template: string; output: string }> = [
   { template: 'CLAUDE.md.hbs', output: 'CLAUDE.md' },
   { template: 'CLAUDE.architecture.md.hbs', output: 'CLAUDE.architecture.md' },
   { template: 'CLAUDE.lessons.md.hbs', output: 'CLAUDE.lessons.md' },
   { template: 'CLAUDE.local.md.hbs', output: 'CLAUDE.local.md' },
-  { template: 'agents/architecture-reviewer.md.hbs', output: '.claude/agents/architecture-reviewer.md' },
-  { template: 'agents/implementation-engineer.md.hbs', output: '.claude/agents/implementation-engineer.md' },
+  {
+    template: 'agents/architecture-reviewer.md.hbs',
+    output: '.claude/agents/architecture-reviewer.md',
+  },
+  {
+    template: 'agents/implementation-engineer.md.hbs',
+    output: '.claude/agents/implementation-engineer.md',
+  },
   { template: 'agents/code-reviewer.md.hbs', output: '.claude/agents/code-reviewer.md' },
   { template: 'agents/fix-bug.md.hbs', output: '.claude/agents/fix-bug.md' },
   { template: 'agents/refactor-guardian.md.hbs', output: '.claude/agents/refactor-guardian.md' },
@@ -21,12 +27,24 @@ const TEMPLATE_FILES: Array<{ template: string; output: string }> = [
   { template: 'commands/quick-bugfix.md.hbs', output: '.claude/commands/quick-bugfix.md' },
   { template: 'commands/risky-plan.md.hbs', output: '.claude/commands/risky-plan.md' },
   { template: 'commands/verify.md.hbs', output: '.claude/commands/verify.md' },
-  { template: 'commands/requirement-clarify.md.hbs', output: '.claude/commands/requirement-clarify.md' },
+  {
+    template: 'commands/requirement-clarify.md.hbs',
+    output: '.claude/commands/requirement-clarify.md',
+  },
   { template: 'workflows/README.md.hbs', output: '.claude/workflows/README.md' },
-  { template: 'workflows/workflow-diagnosis.md.hbs', output: '.claude/workflows/workflow-diagnosis.md' },
+  {
+    template: 'workflows/workflow-diagnosis.md.hbs',
+    output: '.claude/workflows/workflow-diagnosis.md',
+  },
   { template: 'workflows/workflow-bugfix.md.hbs', output: '.claude/workflows/workflow-bugfix.md' },
-  { template: 'workflows/workflow-new-feature.md.hbs', output: '.claude/workflows/workflow-new-feature.md' },
-  { template: 'workflows/workflow-dangerous-module.md.hbs', output: '.claude/workflows/workflow-dangerous-module.md' },
+  {
+    template: 'workflows/workflow-new-feature.md.hbs',
+    output: '.claude/workflows/workflow-new-feature.md',
+  },
+  {
+    template: 'workflows/workflow-dangerous-module.md.hbs',
+    output: '.claude/workflows/workflow-dangerous-module.md',
+  },
   {
     template: 'workflows/workflow-requirement-clarify.md.hbs',
     output: '.claude/workflows/workflow-requirement-clarify.md',
