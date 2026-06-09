@@ -1,7 +1,10 @@
 import path from 'node:path'
 import { generateClaudeCodePlan as defaultGenerateClaudeCodePlan } from '../generators/index.js'
 import type { WritePlan } from '../generators/write-plan.js'
-import { loadProjectProfileFromAnswers } from '../prompts/answers-profile.js'
+import {
+  createDefaultProjectProfile,
+  loadProjectProfileFromAnswers,
+} from '../prompts/answers-profile.js'
 import { collectProjectProfile as defaultCollectProjectProfile } from '../prompts/init-prompts.js'
 import type { ProjectProfile } from '../schemas/project-profile.js'
 import {
@@ -47,9 +50,7 @@ export async function runInitCommand(
   const persistWritePlan = dependencies.writePlan ?? defaultWritePlan
 
   const outputDir = path.resolve(options.output)
-  const profile = options.answers
-    ? await loadProjectProfileFromAnswers(outputDir, options.answers)
-    : await collectProjectProfile(outputDir)
+  const profile = await resolveProfile(outputDir, options, collectProjectProfile)
   const plan = await generateClaudeCodePlan(profile)
 
   if (options.dryRun) {
@@ -75,6 +76,22 @@ export async function runInitCommand(
 
   logger.success(`Generated ${result.written.length} governance files in ${outputDir}`)
   logger.list(result.written)
+}
+
+async function resolveProfile(
+  outputDir: string,
+  options: InitOptions,
+  collectProjectProfile: (rootDir: string) => Promise<ProjectProfile>,
+): Promise<ProjectProfile> {
+  if (options.answers) {
+    return loadProjectProfileFromAnswers(outputDir, options.answers)
+  }
+
+  if (options.dryRun) {
+    return createDefaultProjectProfile(outputDir)
+  }
+
+  return collectProjectProfile(outputDir)
 }
 
 function printDryRun(outputDir: string, files: string[], conflicts: string[]): void {

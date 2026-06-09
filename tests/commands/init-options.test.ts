@@ -63,7 +63,8 @@ describe('runInitCommand', () => {
     ).rejects.toThrow('planned but not implemented')
   })
 
-  it('does not write during dry-run', async () => {
+  it('does not prompt or write during dry-run', async () => {
+    let promptCalled = false
     let writeCalled = false
 
     await runInitCommand(
@@ -75,7 +76,10 @@ describe('runInitCommand', () => {
         scan: true,
       },
       {
-        collectProjectProfile: async (rootDir) => profile(rootDir),
+        collectProjectProfile: async (rootDir) => {
+          promptCalled = true
+          return profile(rootDir)
+        },
         generateClaudeCodePlan: async () => plan,
         findConflicts: async () => [],
         writePlan: async () => {
@@ -85,6 +89,7 @@ describe('runInitCommand', () => {
       },
     )
 
+    expect(promptCalled).toBe(false)
     expect(writeCalled).toBe(false)
   })
 })

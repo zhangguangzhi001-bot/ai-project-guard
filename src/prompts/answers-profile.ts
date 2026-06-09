@@ -40,6 +40,11 @@ interface AnswersFile {
 
 const TODO = 'TODO: human review required'
 
+export function createDefaultProjectProfile(rootDir: string): ProjectProfile {
+  const resolvedRootDir = path.resolve(rootDir)
+  return toProjectProfile(resolvedRootDir, {})
+}
+
 export async function loadProjectProfileFromAnswers(
   rootDir: string,
   answersPath: string,
@@ -49,6 +54,10 @@ export async function loadProjectProfileFromAnswers(
   const answers = JSON.parse(raw) as AnswersFile
   const resolvedRootDir = path.resolve(rootDir)
 
+  return toProjectProfile(resolvedRootDir, answers)
+}
+
+function toProjectProfile(resolvedRootDir: string, answers: AnswersFile): ProjectProfile {
   return {
     projectName: text(answers.projectName, path.basename(resolvedRootDir)),
     projectSummary: text(answers.projectSummary, TODO),
