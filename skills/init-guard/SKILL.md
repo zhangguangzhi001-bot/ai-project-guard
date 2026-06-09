@@ -69,20 +69,22 @@ If the user approves, run:
 npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code
 ```
 
-The CLI will ask project-specific questions about:
+By default, the CLI asks a short quick questionnaire:
 
 1. Project name
-2. One-sentence project summary
-3. Current core business flow
-4. Legacy path / compatibility flow that still matters
-5. Dangerous modules/files
-6. Status strings or business constants that must not be renamed
-7. API contracts that must not change
-8. Sensitive external systems (names only, never secrets)
-9. Real test/build commands
-10. Placeholder or untrusted tests
-11. Current branch name and focus
-12. Changes that require human review
+2. Project summary
+3. Core business flow / main area to protect
+4. Dangerous modules/files
+5. Real verification commands
+6. Current branch/focus
+
+If the user wants complete governance coverage, run the full questionnaire instead:
+
+```bash
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --full
+```
+
+`--full` asks all architecture, contract, risk, test, and local-context questions.
 
 ### Step 4: Review generated files
 

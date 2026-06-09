@@ -11,10 +11,81 @@ import {
   parseList,
   withTodoIfEmpty,
 } from '../utils/list.js'
+import { createDefaultProjectProfile } from './answers-profile.js'
 import { collectLocalContext } from './local-prompts.js'
 import { collectContracts, collectRisks } from './risk-prompts.js'
 
-export async function collectProjectProfile(rootDir: string): Promise<ProjectProfile> {
+export interface CollectProjectProfileOptions {
+  full?: boolean
+}
+
+export async function collectProjectProfile(
+  rootDir: string,
+  options: CollectProjectProfileOptions = {},
+): Promise<ProjectProfile> {
+  if (options.full) {
+    return collectFullProjectProfile(rootDir)
+  }
+
+  return collectQuickProjectProfile(rootDir)
+}
+
+async function collectQuickProjectProfile(rootDir: string): Promise<ProjectProfile> {
+  const profile = createDefaultProjectProfile(rootDir)
+
+  const projectName = await input({
+    message: 'Project name:',
+    default: path.basename(path.resolve(rootDir)),
+  })
+  const projectSummary = await input({
+    message: 'Project summary (one sentence, optional):',
+    default: profile.projectSummary,
+  })
+  const coreBusinessFlow = await input({
+    message: 'Core business flow / main area to protect (optional):',
+    default: profile.architecture.coreBusinessFlow,
+  })
+  const dangerousModules = parseList(
+    await input({
+      message: 'Dangerous modules/files AI must be careful with (comma-separated, optional):',
+    }),
+  )
+  const testCommands = parseList(
+    await input({
+      message: 'Real verification commands, e.g. npm test (comma-separated, optional):',
+    }),
+  )
+  const currentFocus = await input({
+    message: 'Current branch/focus (optional):',
+    default: profile.localContext.currentFocus,
+  })
+
+  return {
+    ...profile,
+    projectName: maskSecretLikeValues(projectName.trim() || profile.projectName),
+    projectSummary: maskSecretLikeValues(projectSummary.trim() || profile.projectSummary),
+    architecture: {
+      ...profile.architecture,
+      coreBusinessFlow: maskSecretLikeValues(
+        coreBusinessFlow.trim() || profile.architecture.coreBusinessFlow,
+      ),
+    },
+    risks: {
+      ...profile.risks,
+      dangerousModules: withTodoIfEmpty(maskListSecretLikeValues(dangerousModules)),
+    },
+    tests: {
+      ...profile.tests,
+      testCommands: withTodoIfEmpty(maskListSecretLikeValues(testCommands)),
+    },
+    localContext: {
+      ...profile.localContext,
+      currentFocus: maskSecretLikeValues(currentFocus.trim() || profile.localContext.currentFocus),
+    },
+  }
+}
+
+async function collectFullProjectProfile(rootDir: string): Promise<ProjectProfile> {
   const projectName = await input({
     message: 'Project name:',
     default: path.basename(path.resolve(rootDir)),

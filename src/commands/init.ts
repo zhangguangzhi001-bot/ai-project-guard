@@ -20,10 +20,11 @@ export interface InitOptions {
   force: boolean
   scan: boolean
   answers?: string
+  full?: boolean
 }
 
 export interface InitDependencies {
-  collectProjectProfile?: (rootDir: string) => Promise<ProjectProfile>
+  collectProjectProfile?: (rootDir: string, options?: { full?: boolean }) => Promise<ProjectProfile>
   generateClaudeCodePlan?: (profile: ProjectProfile) => Promise<WritePlan>
   findConflicts?: (outputDir: string, plan: WritePlan) => Promise<string[]>
   writePlan?: (
@@ -81,7 +82,7 @@ export async function runInitCommand(
 async function resolveProfile(
   outputDir: string,
   options: InitOptions,
-  collectProjectProfile: (rootDir: string) => Promise<ProjectProfile>,
+  collectProjectProfile: (rootDir: string, options?: { full?: boolean }) => Promise<ProjectProfile>,
 ): Promise<ProjectProfile> {
   if (options.answers) {
     return loadProjectProfileFromAnswers(outputDir, options.answers)
@@ -91,7 +92,7 @@ async function resolveProfile(
     return createDefaultProjectProfile(outputDir)
   }
 
-  return collectProjectProfile(outputDir)
+  return collectProjectProfile(outputDir, { full: options.full })
 }
 
 function printDryRun(outputDir: string, files: string[], conflicts: string[]): void {

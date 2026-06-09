@@ -23,7 +23,8 @@ Use these commands from the root directory of the project you want to initialize
 | Situation | Use this command | Why |
 |-----------|------------------|-----|
 | First time trying AI Project Guard in a project | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --dry-run` | Safest option. Shows what would be generated without writing files. |
-| You reviewed the dry-run output and want to generate files | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code` | Runs interactive questions and writes governance files. |
+| You reviewed the dry-run output and want to generate files | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code` | Runs the quick questionnaire and writes governance files. |
+| You want the complete governance questionnaire | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --full` | Asks all detailed architecture, contract, risk, test, and local-context questions. |
 | You want repeatable / CI-friendly initialization | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --answers ./answers.json` | Uses a JSON answers file instead of interactive prompts. |
 | You use the tool often across many projects | `npm install -g github:zhangguangzhi001-bot/ai-project-guard` then `ai-project-guard init --profile claude-code` | Installs the CLI once so you can run it anywhere. |
 | You are using Claude Code and want workflow guidance | `/plugin install zhangguangzhi001-bot/ai-project-guard` then `/init-guard` | Installs optional Claude Code skills that guide CLI usage. |
@@ -201,7 +202,8 @@ Claude Code 插件和 skills 是可选的便捷入口。它们帮助 Claude Code
 | 使用场景 | 使用命令 | 说明 |
 |---------|----------|------|
 | 第一次在某个项目里试用 | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --dry-run` | 最安全，只预览将生成哪些文件，不会写入。 |
-| 看过预览后，确认要生成文件 | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code` | 进入交互式问答，并写入治理文件。 |
+| 看过预览后，确认要生成文件 | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code` | 进入快速问答，并写入治理文件。 |
+| 想完整确认所有治理细节 | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --full` | 询问完整的架构、契约、风险、测试和本地上下文问题。 |
 | 想在 CI / 脚本 / 多项目中重复初始化 | `npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --answers ./answers.json` | 使用 JSON 答案文件，不需要人工逐个回答。 |
 | 经常在多个项目里使用 | `npm install -g github:zhangguangzhi001-bot/ai-project-guard` 后执行 `ai-project-guard init --profile claude-code` | 全局安装一次，之后任何项目都能直接用。 |
 | 正在 Claude Code 中，希望 Claude 帮你按流程操作 | `/plugin install zhangguangzhi001-bot/ai-project-guard` 后执行 `/init-guard` | 安装可选 skills，引导 Claude Code 正确使用 CLI。 |

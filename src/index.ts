@@ -18,6 +18,11 @@ program
   .option('--dry-run', 'show what would be generated without writing files', false)
   .option('--force', 'overwrite existing generated governance files', false)
   .option('--answers <file>', 'non-interactive JSON answers file')
+  .option(
+    '--full',
+    'ask the full governance questionnaire instead of the default quick questionnaire',
+    false,
+  )
   .option('--no-scan', 'skip lightweight local metadata suggestions')
   .action(async (options) => {
     await runInitCommand(options)
