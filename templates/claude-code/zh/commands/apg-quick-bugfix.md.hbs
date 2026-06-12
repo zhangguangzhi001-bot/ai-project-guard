@@ -1,0 +1,22 @@
+# /apg-quick-bugfix
+
+## 目的
+
+处理 Tier 0-1 的低风险小 bug。
+
+## 允许范围
+
+- 单文件或小范围修复。
+- 不改变 API、数据、权限、外部系统、legacy 契约。
+- 不触碰危险模块：{{inlineList risks.dangerousModules}}。
+
+## 步骤
+
+1. 说明根因。
+2. 做最小修复。
+3. 运行聚焦验证：{{inlineList tests.testCommands}}。
+4. 汇报验证结果。
+
+## 停止条件
+
+如果涉及契约、migration、外部系统或 legacy 模块，升级到 `/apg-risky-plan`。

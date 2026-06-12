@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
-  CLAUDE_CODE_OUTPUT_FILES,
+  CLAUDE_CODE_BASE_OUTPUT_FILES,
+  CLAUDE_CODE_PACK_OUTPUT_FILES,
   generateClaudeCodePlan,
 } from '../../src/generators/claude-generator.js'
 import type { ProjectProfile } from '../../src/schemas/project-profile.js'
@@ -45,18 +46,55 @@ function sampleProfile(): ProjectProfile {
       temporaryConstraints: ['Do not touch billing'],
       currentForbiddenAreas: ['src/billing'],
     },
+    suggestedPacks: [],
+  }
+}
+
+function javaProfile(): ProjectProfile {
+  return {
+    ...sampleProfile(),
+    stacks: [{ area: 'backend', name: 'Maven/Java', confidence: 'high', evidence: ['pom.xml'] }],
+    tests: {
+      ...sampleProfile().tests,
+      testCommands: ['mvn test'],
+      buildCommands: ['mvn clean package -DskipTests'],
+    },
+    suggestedPacks: [
+      {
+        id: 'java-release-audit',
+        confidence: 'high',
+        reason: 'Detected Java project',
+        evidence: ['pom.xml', 'src/main/java'],
+      },
+    ],
   }
 }
 
 describe('generateClaudeCodePlan', () => {
-  it('generates the full Claude Code governance file set', async () => {
+  it('generates the base Claude Code governance file set by default', async () => {
     const plan = await generateClaudeCodePlan(sampleProfile())
     const paths = plan.files.map((file) => file.relativePath)
 
-    expect(paths).toEqual(CLAUDE_CODE_OUTPUT_FILES)
+    expect(paths).toEqual(CLAUDE_CODE_BASE_OUTPUT_FILES)
     expect(paths).toContain('.claude/commands/apg-daily-review.md')
     expect(paths).toContain('.claude/commands/apg-requirement-clarify.md')
+    expect(paths).not.toContain('.claude/commands/apg-java-release-audit.md')
     expect(paths).toContain('.claude/workflows/apg-workflow-requirement-clarify.md')
+  })
+
+  it('generates the Java release audit pack when suggested', async () => {
+    const plan = await generateClaudeCodePlan(javaProfile())
+    const paths = plan.files.map((file) => file.relativePath)
+
+    expect(paths).toEqual([
+      ...CLAUDE_CODE_BASE_OUTPUT_FILES,
+      ...CLAUDE_CODE_PACK_OUTPUT_FILES['java-release-audit'],
+    ])
+    expect(paths).toContain('.claude/commands/apg-java-release-audit.md')
+    expect(paths).toContain('.claude/agents/apg-java-risk-module-auditor.md')
+    expect(paths).toContain('.claude/agents/apg-financial-release-auditor.md')
+    expect(paths).toContain('.claude/agents/apg-release-blocker-judge.md')
+    expect(paths).toContain('.claude/workflows/apg-workflow-java-release-audit.md')
   })
 
   it('renders project-specific governance content', async () => {

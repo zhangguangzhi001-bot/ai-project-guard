@@ -18,6 +18,7 @@ program
   .option('--dry-run', 'show what would be generated without writing files', false)
   .option('--force', 'overwrite existing generated governance files', false)
   .option('--answers <file>', 'non-interactive JSON answers file')
+  .option('--language <language>', 'generated Markdown language: zh or en', 'zh')
   .option(
     '--interactive',
     'ask the quick questionnaire instead of auto-generating from scan',

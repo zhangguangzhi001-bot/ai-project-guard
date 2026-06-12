@@ -8,6 +8,7 @@ import {
 import { collectProjectProfile as defaultCollectProjectProfile } from '../prompts/init-prompts.js'
 import { createScannedProjectProfile } from '../scanners/light-scan.js'
 import type { ProjectProfile } from '../schemas/project-profile.js'
+import { normalizeGeneratedLanguage, type GeneratedLanguage } from '../schemas/template-context.js'
 import {
   findConflicts as defaultFindConflicts,
   writePlan as defaultWritePlan,
@@ -23,11 +24,15 @@ export interface InitOptions {
   answers?: string
   full?: boolean
   interactive?: boolean
+  language?: string
 }
 
 export interface InitDependencies {
   collectProjectProfile?: (rootDir: string, options?: { full?: boolean }) => Promise<ProjectProfile>
-  generateClaudeCodePlan?: (profile: ProjectProfile) => Promise<WritePlan>
+  generateClaudeCodePlan?: (
+    profile: ProjectProfile,
+    options?: { language?: GeneratedLanguage },
+  ) => Promise<WritePlan>
   findConflicts?: (outputDir: string, plan: WritePlan) => Promise<string[]>
   writePlan?: (
     outputDir: string,
@@ -52,14 +57,17 @@ export async function runInitCommand(
   const findConflicts = dependencies.findConflicts ?? defaultFindConflicts
   const persistWritePlan = dependencies.writePlan ?? defaultWritePlan
 
+  const language = normalizeGeneratedLanguage(options.language)
   const outputDir = path.resolve(options.output)
-  const profile = await resolveProfile(outputDir, options, collectProjectProfile)
-  const plan = await generateClaudeCodePlan(profile)
+  const profile = await resolveProfile(outputDir, options, language, collectProjectProfile)
+  const plan = await generateClaudeCodePlan(profile, { language })
 
   if (options.dryRun) {
     const conflicts = await findConflicts(outputDir, plan)
     printDryRun(
       outputDir,
+      language,
+      profile.suggestedPacks?.map((pack) => `${pack.id} (${pack.confidence})`) ?? [],
       plan.files.map((file) => file.relativePath),
       conflicts,
     )
@@ -84,10 +92,11 @@ export async function runInitCommand(
 async function resolveProfile(
   outputDir: string,
   options: InitOptions,
+  language: GeneratedLanguage,
   collectProjectProfile: (rootDir: string, options?: { full?: boolean }) => Promise<ProjectProfile>,
 ): Promise<ProjectProfile> {
   if (options.answers) {
-    return loadProjectProfileFromAnswers(outputDir, options.answers)
+    return loadProjectProfileFromAnswers(outputDir, options.answers, { language })
   }
 
   if (options.interactive || options.full) {
@@ -95,17 +104,31 @@ async function resolveProfile(
   }
 
   if (options.scan === false) {
-    return createDefaultProjectProfile(outputDir)
+    return createDefaultProjectProfile(outputDir, { language })
   }
 
-  return createScannedProjectProfile(outputDir)
+  return createScannedProjectProfile(outputDir, { language })
 }
 
-function printDryRun(outputDir: string, files: string[], conflicts: string[]): void {
+function printDryRun(
+  outputDir: string,
+  language: GeneratedLanguage,
+  suggestedPacks: string[],
+  files: string[],
+  conflicts: string[],
+): void {
   logger.info('AI Project Guard dry run')
   logger.info('')
   logger.info('Profile: claude-code')
+  logger.info(`Markdown language: ${language}`)
   logger.info(`Output: ${outputDir}`)
+  logger.info('')
+  logger.info('Suggested packs:')
+  if (suggestedPacks.length > 0) {
+    logger.list(suggestedPacks)
+  } else {
+    logger.info('- none')
+  }
   logger.info('')
   logger.info('Would create:')
   logger.list(files)

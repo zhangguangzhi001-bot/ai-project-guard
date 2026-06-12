@@ -1,0 +1,32 @@
+# AI Project Guard workflows
+
+适用于 {{projectName}} 的 Claude Code 工作流。
+
+## Tier 路由
+
+- Tier 0：文档、注释、文案、非逻辑样式改动。
+- Tier 1：不涉及契约和危险模块的低风险 bug 修复。
+- Tier 2：API、DTO/VO、TypeScript 类型、Repository/Mapper、查询/写入、响应结构。
+- Tier 3：危险模块、外部系统、状态机、migration、legacy/兼容层、认证/安全、高耦合区域。
+
+## Contract Guard
+
+必须保持：
+
+{{list contracts.apiContracts}}
+{{list contracts.statusContracts}}
+{{list contracts.schemaContracts}}
+{{list contracts.frontendContracts}}
+{{list contracts.externalContracts}}
+
+## 危险模块
+
+{{list risks.dangerousModules}}
+
+## Workflow 文件
+
+- `apg-workflow-diagnosis.md`
+- `apg-workflow-bugfix.md`
+- `apg-workflow-new-feature.md`
+- `apg-workflow-dangerous-module.md`
+- `apg-workflow-requirement-clarify.md`

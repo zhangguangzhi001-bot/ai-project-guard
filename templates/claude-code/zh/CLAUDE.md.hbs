@@ -1,0 +1,92 @@
+# CLAUDE.md
+
+本文件为 Claude Code（claude.ai/code）在本仓库工作时提供项目级指导。
+
+## 阅读顺序
+
+1. `CLAUDE.architecture.md`
+2. `CLAUDE.lessons.md`
+3. `CLAUDE.local.md`
+
+## 项目概览
+
+- 项目：{{projectName}}
+- 简介：{{projectSummary}}
+- 生成工具：{{generatedBy}}
+
+## 核心架构事实
+
+- 核心业务流程：{{architecture.coreBusinessFlow}}
+- 当前主链路：{{architecture.mainPath}}
+- Legacy / 兼容链路：{{architecture.legacyPath}}
+
+运行入口：
+
+{{list architecture.runtimeEntryPoints}}
+
+模块边界：
+
+{{list architecture.moduleBoundaries}}
+
+## Contract Guard（契约保护）
+
+API 契约：
+
+{{list contracts.apiContracts}}
+
+状态 / 业务常量契约：
+
+{{list contracts.statusContracts}}
+
+数据库 / Schema 契约：
+
+{{list contracts.schemaContracts}}
+
+前端类型 / API 调用契约：
+
+{{list contracts.frontendContracts}}
+
+外部系统契约：
+
+{{list contracts.externalContracts}}
+
+## 危险模块
+
+{{list risks.dangerousModules}}
+
+## Legacy / 兼容模块
+
+{{list risks.legacyModules}}
+
+## 禁止事项
+
+{{list risks.forbiddenActions}}
+
+## 常用命令
+
+构建 / 类型检查 / Lint：
+
+{{list tests.buildCommands}}
+
+测试命令：
+
+{{list tests.testCommands}}
+
+占位或不可信测试：
+
+{{list tests.invalidOrPlaceholderTests}}
+
+## AI 开发工作流
+
+- Tier 0：文档、注释、文案、非逻辑样式改动。可最小修改，按需验证。
+- Tier 1：低风险单文件 bug，且不涉及 API、数据、权限、外部系统、legacy 或危险模块。先简要诊断，再最小修复并聚焦验证。
+- Tier 2：API、数据契约、DTO/VO、前端类型、Repository/Mapper、查询/写入、响应结构。必须分析影响面并验证契约两端。
+- Tier 3：危险模块、外部系统、状态机、migration、legacy/兼容层、认证/安全、高耦合区域。先分析和计划，需要人工确认后再实现。
+
+## 需要人工决策
+
+{{list risks.humanReviewRequired}}
+
+## 安全与隐私
+
+不要把真实 secret、token、password、access key、private key、签名 URL 或敏感业务数据写入生成文件、日志、提示词或提交中。如发现敏感配置，只说明字段名/文件位置，并隐藏真实值。

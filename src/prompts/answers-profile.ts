@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { ProjectProfile } from '../schemas/project-profile.js'
+import type { GeneratedLanguage } from '../schemas/template-context.js'
+import { todoTextForLanguage } from '../schemas/template-context.js'
 import {
   maskListSecretLikeValues,
   maskSecretLikeValues,
@@ -38,65 +40,77 @@ interface AnswersFile {
   currentForbiddenAreas?: AnswerValue
 }
 
-const TODO = 'TODO: human review required'
+export interface ProfileLanguageOptions {
+  language?: GeneratedLanguage
+}
 
-export function createDefaultProjectProfile(rootDir: string): ProjectProfile {
+export function createDefaultProjectProfile(
+  rootDir: string,
+  options: ProfileLanguageOptions = {},
+): ProjectProfile {
   const resolvedRootDir = path.resolve(rootDir)
-  return toProjectProfile(resolvedRootDir, {})
+  return toProjectProfile(resolvedRootDir, {}, options.language ?? 'zh')
 }
 
 export async function loadProjectProfileFromAnswers(
   rootDir: string,
   answersPath: string,
+  options: ProfileLanguageOptions = {},
 ): Promise<ProjectProfile> {
   const resolvedAnswersPath = path.resolve(answersPath)
   const raw = await fs.readFile(resolvedAnswersPath, 'utf8')
   const answers = JSON.parse(raw) as AnswersFile
   const resolvedRootDir = path.resolve(rootDir)
 
-  return toProjectProfile(resolvedRootDir, answers)
+  return toProjectProfile(resolvedRootDir, answers, options.language ?? 'zh')
 }
 
-function toProjectProfile(resolvedRootDir: string, answers: AnswersFile): ProjectProfile {
+function toProjectProfile(
+  resolvedRootDir: string,
+  answers: AnswersFile,
+  language: GeneratedLanguage,
+): ProjectProfile {
+  const todoText = todoTextForLanguage(language)
   return {
     projectName: text(answers.projectName, path.basename(resolvedRootDir)),
-    projectSummary: text(answers.projectSummary, TODO),
+    projectSummary: text(answers.projectSummary, todoText),
     rootDir: resolvedRootDir,
     profile: 'claude-code',
     stacks: [],
     architecture: {
-      coreBusinessFlow: text(answers.coreBusinessFlow, TODO),
-      mainPath: text(answers.mainPath, TODO),
-      legacyPath: text(answers.legacyPath, TODO),
-      runtimeEntryPoints: list(answers.runtimeEntryPoints),
-      moduleBoundaries: list(answers.moduleBoundaries),
-      externalSystems: list(answers.externalSystems),
+      coreBusinessFlow: text(answers.coreBusinessFlow, todoText),
+      mainPath: text(answers.mainPath, todoText),
+      legacyPath: text(answers.legacyPath, todoText),
+      runtimeEntryPoints: list(answers.runtimeEntryPoints, todoText),
+      moduleBoundaries: list(answers.moduleBoundaries, todoText),
+      externalSystems: list(answers.externalSystems, todoText),
     },
     contracts: {
-      apiContracts: list(answers.apiContracts),
-      statusContracts: list(answers.statusContracts),
-      schemaContracts: list(answers.schemaContracts),
-      frontendContracts: list(answers.frontendContracts),
-      externalContracts: list(answers.externalContracts),
+      apiContracts: list(answers.apiContracts, todoText),
+      statusContracts: list(answers.statusContracts, todoText),
+      schemaContracts: list(answers.schemaContracts, todoText),
+      frontendContracts: list(answers.frontendContracts, todoText),
+      externalContracts: list(answers.externalContracts, todoText),
     },
     risks: {
-      dangerousModules: list(answers.dangerousModules),
-      legacyModules: list(answers.legacyModules),
-      forbiddenActions: list(answers.forbiddenActions),
-      humanReviewRequired: list(answers.humanReviewRequired),
+      dangerousModules: list(answers.dangerousModules, todoText),
+      legacyModules: list(answers.legacyModules, todoText),
+      forbiddenActions: list(answers.forbiddenActions, todoText),
+      humanReviewRequired: list(answers.humanReviewRequired, todoText),
     },
     tests: {
-      testCommands: list(answers.testCommands),
-      buildCommands: list(answers.buildCommands),
-      invalidOrPlaceholderTests: list(answers.invalidOrPlaceholderTests),
-      verificationRules: list(answers.verificationRules),
+      testCommands: list(answers.testCommands, todoText),
+      buildCommands: list(answers.buildCommands, todoText),
+      invalidOrPlaceholderTests: list(answers.invalidOrPlaceholderTests, todoText),
+      verificationRules: list(answers.verificationRules, todoText),
     },
     localContext: {
-      currentBranch: text(answers.currentBranch, TODO),
-      currentFocus: text(answers.currentFocus, TODO),
-      temporaryConstraints: list(answers.temporaryConstraints),
-      currentForbiddenAreas: list(answers.currentForbiddenAreas),
+      currentBranch: text(answers.currentBranch, todoText),
+      currentFocus: text(answers.currentFocus, todoText),
+      temporaryConstraints: list(answers.temporaryConstraints, todoText),
+      currentForbiddenAreas: list(answers.currentForbiddenAreas, todoText),
     },
+    suggestedPacks: [],
   }
 }
 
@@ -104,6 +118,6 @@ function text(value: string | undefined, fallback: string): string {
   return maskSecretLikeValues(value?.trim() || fallback)
 }
 
-function list(value: AnswerValue): string[] {
-  return withTodoIfEmpty(maskListSecretLikeValues(parseList(value)))
+function list(value: AnswerValue, todoText: string): string[] {
+  return withTodoIfEmpty(maskListSecretLikeValues(parseList(value)), todoText)
 }

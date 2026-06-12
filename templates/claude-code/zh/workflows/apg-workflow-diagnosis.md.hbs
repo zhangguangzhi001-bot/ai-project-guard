@@ -1,0 +1,11 @@
+# apg-workflow-diagnosis
+
+用于原因不明的问题诊断。
+
+1. 读取项目上下文文件。
+2. 先收集证据，不要直接编辑。
+3. 从运行入口追踪：{{inlineList architecture.runtimeEntryPoints}}。
+4. 判断是否触碰契约或危险模块。
+5. 输出根因假设和建议下一步。
+
+根因不明确或任务属于 Tier 3 时，停止并先计划。

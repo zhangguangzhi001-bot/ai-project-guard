@@ -1,0 +1,16 @@
+# /apg-daily-start
+
+## 目的
+
+开始工作前加载 {{projectName}} 的治理上下文，识别风险等级，并选择正确 workflow。
+
+## 步骤
+
+1. 读取 `CLAUDE.md`、`CLAUDE.architecture.md`、`CLAUDE.lessons.md`、`CLAUDE.local.md`。
+2. 判断任务是否触碰危险模块：{{inlineList risks.dangerousModules}}。
+3. 判断任务是否改变契约：{{inlineList contracts.apiContracts}}。
+4. 按 `.claude/workflows/apg-workflows.md` 路由。
+
+## 停止条件
+
+如果需求不清楚、触碰 Tier 3 区域、或涉及人工 review 区域，先停止并澄清：{{inlineList risks.humanReviewRequired}}。

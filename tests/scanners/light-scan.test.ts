@@ -49,5 +49,73 @@ describe('createScannedProjectProfile', () => {
       expect.arrayContaining(['npm run build', 'npm run typecheck']),
     )
     expect(profile.architecture.externalSystems).toContain('Stripe')
+    expect(profile.suggestedPacks).toEqual([])
+  })
+
+  it('suggests the Java release audit pack for Maven projects', async () => {
+    await fs.mkdir(path.join(tempDir, 'src', 'main', 'java', 'com', 'example', 'payment'), {
+      recursive: true,
+    })
+    await fs.mkdir(path.join(tempDir, 'src', 'main', 'resources', 'mapper'), { recursive: true })
+    await fs.writeFile(path.join(tempDir, 'pom.xml'), '<project></project>', 'utf8')
+    await fs.writeFile(
+      path.join(tempDir, 'src', 'main', 'resources', 'application.yml'),
+      'spring:\n  application:\n    name: payment-service\n',
+      'utf8',
+    )
+    await fs.writeFile(
+      path.join(tempDir, 'src', 'main', 'java', 'com', 'example', 'PaymentApplication.java'),
+      'class PaymentApplication {}',
+      'utf8',
+    )
+    await fs.writeFile(
+      path.join(tempDir, 'src', 'main', 'resources', 'mapper', 'PaymentMapper.xml'),
+      '<mapper></mapper>',
+      'utf8',
+    )
+
+    const profile = await createScannedProjectProfile(tempDir)
+
+    expect(profile.stacks.map((stack) => stack.name)).toContain('Maven/Java')
+    expect(profile.tests.testCommands).toContain('mvn test')
+    expect(profile.tests.buildCommands).toContain('mvn clean package -DskipTests')
+    expect(profile.risks.dangerousModules).toEqual(
+      expect.arrayContaining(['src/main/java/com/example/payment', 'src/main/resources/mapper']),
+    )
+    expect(profile.suggestedPacks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'java-release-audit',
+          confidence: 'high',
+          evidence: expect.arrayContaining(['pom.xml', 'src/main/java']),
+        }),
+      ]),
+    )
+  })
+
+  it('suggests the Java release audit pack for Gradle Kotlin DSL projects', async () => {
+    await fs.mkdir(path.join(tempDir, 'src', 'main', 'java', 'com', 'example'), { recursive: true })
+    await fs.writeFile(path.join(tempDir, 'build.gradle.kts'), 'plugins { java }', 'utf8')
+    await fs.writeFile(path.join(tempDir, 'settings.gradle.kts'), 'rootProject.name = "demo"', 'utf8')
+    await fs.writeFile(
+      path.join(tempDir, 'src', 'main', 'java', 'com', 'example', 'DemoApplication.java'),
+      'class DemoApplication {}',
+      'utf8',
+    )
+
+    const profile = await createScannedProjectProfile(tempDir)
+
+    expect(profile.stacks.map((stack) => stack.name)).toContain('Gradle/Java')
+    expect(profile.tests.testCommands).toContain('./gradlew test')
+    expect(profile.tests.buildCommands).toContain('./gradlew build')
+    expect(profile.suggestedPacks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'java-release-audit',
+          confidence: 'high',
+          evidence: expect.arrayContaining(['build.gradle.kts', 'src/main/java']),
+        }),
+      ]),
+    )
   })
 })

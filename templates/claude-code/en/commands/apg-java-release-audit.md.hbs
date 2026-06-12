@@ -1,0 +1,373 @@
+# /apg-java-release-audit
+
+## Purpose
+
+Act as a senior Java architect, financial-system code audit specialist, and pre-release quality gate owner. Audit {{projectName}} or the current vendor-provided Java source code for release readiness.
+
+This is not a normal code review. The goal is to decide whether the system contains severe quality issues, production-incident risks, security vulnerabilities, data-consistency risks, or financial-domain risks around money, states, permissions, auditability, and idempotency.
+
+## Mandatory constraints
+
+- Read source code only. Do not modify any code, configuration, templates, or tests.
+- You may create quality audit reports, comparison reports, and trend analysis reports under a user-specified or user-confirmed audit report directory. By default, do not modify business source directories.
+- Do not give generic advice. Every finding must cite specific files, classes, methods, code locations, and relevant snippets.
+- Do not invent issues just to fill the report. Only report risks that can realistically affect production.
+- Mark uncertain findings as “needs further verification” instead of treating them as blockers.
+- Prioritize high-risk files and modules. Do not spread effort evenly across low-risk code.
+- Do not classify style issues as P0/P1 unless they create production risk.
+- If Maven/Gradle/SpotBugs commands are useful, first explain which local build artifacts they may create and ask for user confirmation. Do not silently run commands that clean, generate, or download dependencies.
+- If secrets, tokens, passwords, access keys, private keys, signed URLs, or sensitive business data are found, cite only the field name and file location. Redact real values.
+
+## Arguments
+
+The user may specify a round after the command:
+
+- `round1`: project health check and risk map. Default.
+- `round2`: focused audit of high-risk modules.
+- `round3`: financial-system专项 audit.
+- `round4`: release-blocking decision.
+- `round5`: vendor remediation checklist.
+- `archive`: archive the current audit result as a dated quality report.
+- `compare <dateA> <dateB>`: compare quality reports from two dates.
+- `trend <startDate> <endDate>`: analyze quality trends across a specified period.
+- `full`: execute in phases; for large codebases, complete `round1` first and do not rush the final release decision.
+
+If no round is specified, start with `round1`. Use `YYYY-MM-DD` for all dates.
+
+## Audit scope and reading order
+
+Read and analyze first:
+
+1. `pom.xml` / `build.gradle` / `settings.gradle`
+2. `application.yml` / `application.properties` / profile-specific config
+3. Application bootstrap class
+4. Controller layer
+5. Service layer
+6. Mapper / Repository layer and Mapper XML
+7. Scheduled jobs
+8. Configuration classes
+9. Security authentication, authorization interceptors, filters, and Security config
+10. Global exception handling
+11. Logging configuration
+12. Database access, transactions, cache, message queues, and external integrations
+
+Current APG dangerous modules: {{inlineList risks.dangerousModules}}.
+
+## High-risk file and module priority
+
+1. Global exception handling
+2. Authorization interceptors / filters / Security config
+3. Controller input validation
+4. Service transaction boundaries
+5. Mapper XML / SQL concatenation
+6. Scheduled jobs
+7. File upload/download
+8. External API calls
+9. Redis distributed locks
+10. Message queue consumers
+11. Money calculation logic
+12. Approval/state-transition logic
+13. Delete, revoke, void, review, and approval operations
+14. `application.yml` configuration
+15. Logging configuration
+
+## Key scan items
+
+Focus on issues that create real production risk:
+
+- Null-pointer risk, swallowed exceptions, ineffective transaction annotations, oversized transactions
+- Concurrency bugs, data inconsistency, repeated submission, missing idempotency
+- Invalid state transitions or missing state-machine constraints
+- Money handled with `double` / `float`
+- Incorrect `BigDecimal` construction, comparison, scale, or rounding
+- SQL concatenation, SQL injection, N+1 queries, slow-query risk
+- External calls without timeout, fallback, or retry boundaries
+- File upload risks, path traversal, missing type validation
+- Sensitive data leakage in logs or configuration
+- Authorization bypass, horizontal privilege escalation, data permission enforced only by frontend
+- Critical delete, void, revoke, or approval operations missing permission or state checks
+- Batch jobs, scheduled jobs, or message consumers that may execute repeatedly
+- Partial success/partial failure with no recovery path
+- Production incidents that would be hard to locate, monitor, or recover
+
+## Severity definitions
+
+- P0: must block release; severe production incident, security incident, fund risk, or data-corruption risk.
+- P1: strongly recommend fixing before release; may harm stability, security, or data consistency.
+- P2: can be fixed after release but must enter the remediation plan.
+- P3: ordinary code-quality issue.
+
+## Report archive and trend analysis
+
+Default report directory: `.claude/audit-reports/java-release/`. If the user specifies another directory, use the user-specified directory.
+
+### Archive rules
+
+- Save the current audit report under `.claude/audit-reports/java-release/YYYY/MM/DD/`.
+- Recommended file names:
+  - `round1-risk-map.md`
+  - `round2-high-risk-audit.md`
+  - `round3-financial-audit.md`
+  - `round4-release-gate.md`
+  - `round5-vendor-remediation.md`
+  - `summary.md`
+- If the same file already exists for the day, ask the user whether to overwrite it, append a version suffix, or only output the report in the conversation.
+- Archived reports must keep machine-comparable summary metrics: P0/P1/P2/P3 counts, release-blocking issue count, pre-release must-fix count, needs-further-verification count, high-risk module count, confirmed-fixed count, and remaining issue count.
+- Do not write real secrets, tokens, passwords, access keys, private keys, signed URLs, or sensitive business data into reports.
+
+### Summary metrics format
+
+Append this section to each archivable report:
+
+```markdown
+## Quality metrics summary
+
+- Audit date: YYYY-MM-DD
+- Audit round: round1/round2/round3/round4/round5/full
+- Audit scope: <module/directory>
+- P0 count: 0
+- P1 count: 0
+- P2 count: 0
+- P3 count: 0
+- Release-blocking issue count: 0
+- Pre-release must-fix count: 0
+- Needs-further-verification count: 0
+- High-risk module count: 0
+- Confirmed-fixed count: 0
+- Remaining issue count: 0
+- Overall conclusion: <one sentence>
+```
+
+### `compare <dateA> <dateB>`: quality report comparison
+
+Execution steps:
+
+1. Read `summary.md` from both date directories. If missing, read and aggregate all round reports under that date directory.
+2. Compare P0/P1/P2/P3 counts, release blockers, pre-release must-fix items, high-risk modules, and needs-further-verification items.
+3. List newly introduced issues, resolved issues, severity-increased issues, severity-decreased issues, and still-open issues.
+4. Match issues by title, file, class, method, and code location. Do not match by title alone.
+5. State whether quality improved, worsened, or stayed roughly the same.
+
+Output format:
+
+```markdown
+## Quality report comparison: YYYY-MM-DD vs YYYY-MM-DD
+
+### 1. Overall change
+
+### 2. Metric change table
+
+| Metric | Date A | Date B | Change |
+| --- | ---: | ---: | ---: |
+| P0 count |  |  |  |
+| P1 count |  |  |  |
+| P2 count |  |  |  |
+| P3 count |  |  |  |
+| Release-blocking issues |  |  |  |
+| Pre-release must-fix issues |  |  |  |
+| Needs further verification |  |  |  |
+
+### 3. New issues
+
+### 4. Resolved issues
+
+### 5. Severity changes
+
+### 6. Still-open issues
+
+### 7. Conclusion and next steps
+```
+
+### `trend <startDate> <endDate>`: quality trend analysis
+
+Execution steps:
+
+1. Read `summary.md` for every dated directory in the specified period. If missing, read and aggregate round reports.
+2. Build trends for P0/P1/P2/P3, blockers, must-fix issues, verification-pending issues, and remaining issues by date.
+3. Identify continuously worsening risks, continuously unresolved issues, recurring issues, and issues that reappeared after being fixed.
+4. Classify the trend as improving, worsening, volatile, stagnant, or insufficient sample.
+5. If reports are missing, list the missing dates explicitly. Do not fabricate a trend.
+
+Output format:
+
+```markdown
+## Quality trend analysis: YYYY-MM-DD to YYYY-MM-DD
+
+### 1. Trend conclusion
+
+### 2. Date coverage
+
+### 3. Core metric trends
+
+| Date | P0 | P1 | P2 | P3 | Blockers | Must-fix | Pending verification | Remaining issues |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+
+### 4. Continuously unresolved issues
+
+### 5. Recurring or reappeared issues
+
+### 6. Risk module trends
+
+### 7. Management recommendations
+```
+
+## Phased audit flow
+
+### Round 1: project health check and risk map
+
+Do not give a final release decision yet. Output:
+
+1. Technology stack
+2. Layered architecture
+3. System module breakdown
+4. Core business flows
+5. High-risk module list
+6. Obvious P0/P1 leads, if any
+7. Files, classes, and methods that should be audited next
+
+### Round 2: focused high-risk module audit
+
+Focus on contracts, payments, approvals, leasing, file uploads, permissions, scheduled jobs, external APIs, and message consumers. Check:
+
+- Transaction consistency
+- Idempotency
+- State transitions
+- Privilege escalation
+- SQL injection
+- Sensitive data leakage
+- Exception handling
+- Log traceability
+- External API timeouts and fallback
+
+Output P0/P1/P2/P3 findings with concrete files and methods.
+
+### Round 3: financial-system专项 audit
+
+Check against financial-system release standards:
+
+1. Whether money fields use `BigDecimal`
+2. Whether `double` / `float` are used for money
+3. Whether `BigDecimal` comparison, scale, and rounding are correct
+4. Whether business state transitions are constrained by a state machine
+5. Whether repeated submission risk exists
+6. Whether critical operations have idempotency controls
+7. Whether critical business operations have audit logs
+8. Whether horizontal privilege escalation exists
+9. Whether data permissions rely only on the frontend
+10. Whether delete, void, revoke, and approval operations validate permissions and state
+11. Whether batch/scheduled jobs can run repeatedly
+12. Whether exceptions can cause partial success and partial failure
+
+Only report risks that can realistically affect production.
+
+### Round 4: release-blocking decision
+
+Act as the client-side technical owner and output a formal release gate opinion:
+
+1. Whether release is recommended
+2. Whether P0 blockers exist
+3. Which P1 issues must be fixed before release
+4. Which issues can be remediated after release
+5. Minimum pre-release remediation checklist
+6. Safeguards required if the business forces release
+7. Vendor remediation requirements
+
+### Round 5: vendor remediation checklist
+
+Prepare a formal, objective, professional vendor remediation checklist. Each issue must include:
+
+- Problem description
+- Risk level
+- Affected module
+- Impact scope
+- Remediation requirement
+- Acceptance criteria
+- Whether it must be completed before release
+
+## Standard output format
+
+### 一、总体结论 / Overall conclusion
+
+One sentence stating whether release is recommended. Use one of:
+
+- Do not release; P0 blockers exist
+- Release with caution only after P1 issues are fixed
+- Release is acceptable with a remediation plan
+- No severe blocker found so far
+
+### 二、系统技术栈与结构判断 / Technology stack and structure
+
+Describe main frameworks, layers, core modules, and high-risk modules.
+
+### 三、P0 阻断问题 / P0 blockers
+
+For each finding include:
+
+- Title
+- Severity
+- File
+- Class / method
+- Code location
+- Relevant snippet
+- Explanation
+- Potential impact
+- Remediation recommendation
+- Whether it blocks release
+
+### 四、P1 高风险问题 / P1 high-risk issues
+
+Use the same format as P0.
+
+### 五、P2/P3 一般问题 / P2/P3 issues
+
+List briefly; do not bury P0/P1 findings.
+
+### 六、金融系统专项风险 / Financial-system risks
+
+Cover money precision, data consistency, transactions, permissions, audit logs, idempotency, state machines, and sensitive-data protection.
+
+### 七、上线前整改建议 / Pre-release remediation advice
+
+Prioritize:
+
+1. Must fix before release
+2. Strongly recommended before release
+3. Fix within one month after release
+4. Long-term technical debt
+
+### 八、最终判断 / Final decision
+
+State clearly:
+
+- Whether release can proceed
+- Which issues must be fixed before release
+- Which issues enter later remediation
+- Advice for client-side technical management
+
+## Local tool suggestions
+
+If the user confirms local command execution, choose based on project type:
+
+Maven:
+
+```bash
+mvn clean test
+mvn dependency:tree
+mvn clean package -DskipTests
+```
+
+SpotBugs:
+
+```bash
+mvn spotbugs:check
+```
+
+Gradle:
+
+```bash
+./gradlew clean test
+./gradlew build
+./gradlew clean build -x test
+```
+
+After running tools, clearly distinguish tool findings, semantically confirmed source-code findings, and findings that still need manual verification.

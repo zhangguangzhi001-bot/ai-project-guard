@@ -93,7 +93,9 @@ The plugin does not replace the CLI. It gives Claude Code workflow guidance for 
 
 ### Generated files
 
-The Claude Code profile generates:
+The Claude Code profile is project-aware. It always generates the base governance files, then adds optional governance packs when local scan evidence matches the current project.
+
+Base files:
 
 ```text
 CLAUDE.md
@@ -119,6 +121,16 @@ CLAUDE.local.md
 .claude/workflows/apg-workflow-new-feature.md
 .claude/workflows/apg-workflow-dangerous-module.md
 .claude/workflows/apg-workflow-requirement-clarify.md
+```
+
+Java release-audit pack, generated only when Java/Maven/Gradle evidence is detected:
+
+```text
+.claude/commands/apg-java-release-audit.md
+.claude/agents/apg-java-risk-module-auditor.md
+.claude/agents/apg-financial-release-auditor.md
+.claude/agents/apg-release-blocker-judge.md
+.claude/workflows/apg-workflow-java-release-audit.md
 ```
 
 ### Skills
@@ -273,7 +285,9 @@ Claude Code 用户也可以安装配套插件：
 
 ### 生成文件
 
-Claude Code profile 会生成：
+Claude Code profile 会根据当前项目自动生成治理文件。所有项目都会生成基础治理文件；如果本地扫描发现 Java / Maven / Gradle 证据，则额外生成 Java 上线审计治理包。
+
+基础文件：
 
 ```text
 CLAUDE.md
@@ -299,6 +313,16 @@ CLAUDE.local.md
 .claude/workflows/apg-workflow-new-feature.md
 .claude/workflows/apg-workflow-dangerous-module.md
 .claude/workflows/apg-workflow-requirement-clarify.md
+```
+
+Java 上线审计治理包，仅在检测到 Java / Maven / Gradle 证据时生成：
+
+```text
+.claude/commands/apg-java-release-audit.md
+.claude/agents/apg-java-risk-module-auditor.md
+.claude/agents/apg-financial-release-auditor.md
+.claude/agents/apg-release-blocker-judge.md
+.claude/workflows/apg-workflow-java-release-audit.md
 ```
 
 ### Skills

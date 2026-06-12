@@ -1,0 +1,23 @@
+# /apg-risky-plan
+
+## 目的
+
+在修改 Tier 2-3 区域前先制定计划。
+
+## 适用范围
+
+- 危险模块：{{inlineList risks.dangerousModules}}
+- Legacy 模块：{{inlineList risks.legacyModules}}
+- API / 状态 / Schema / 前端 / 外部系统契约
+- 需要人工 review 的区域：{{inlineList risks.humanReviewRequired}}
+
+## 步骤
+
+1. 读取全部 `CLAUDE*.md` 文件。
+2. 追踪受影响调用链和契约。
+3. 明确验证命令。
+4. 输出实现计划，等待批准后再编辑。
+
+## 停止条件
+
+未经批准不要实现。

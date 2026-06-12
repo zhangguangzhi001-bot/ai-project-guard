@@ -1,0 +1,45 @@
+# apg-workflow-java-release-audit
+
+Use for pre-release quality audits of Java / Spring / Maven / Gradle projects.
+
+## Entry command
+
+Prefer: `/apg-java-release-audit`
+
+## Recommended staged flow
+
+1. `round1`: project health check and risk map
+   - Identify stack, layers, core business flows, and high-risk modules.
+2. `round2`: focused high-risk module audit
+   - May call `apg-java-risk-module-auditor`.
+   - Focus on controllers, services, mappers, transactions, permissions, file upload, scheduled jobs, and external APIs.
+3. `round3`: financial-system audit
+   - May call `apg-financial-release-auditor`.
+   - Focus on money precision, idempotency, state machines, audit logs, permissions, and data consistency.
+4. `round4`: release-blocking decision
+   - May call `apg-release-blocker-judge`.
+   - Produce Go / No-Go decision and minimum remediation checklist from evidence.
+5. `round5`: vendor remediation checklist
+   - Prepare formal remediation requirements and acceptance criteria.
+
+## Current dangerous modules
+
+{{list risks.dangerousModules}}
+
+## Current verification commands
+
+Build/typecheck/lint:
+
+{{list tests.buildCommands}}
+
+Tests:
+
+{{list tests.testCommands}}
+
+## Report archive
+
+To build trends, use `/apg-java-release-audit archive` to save reports under `.claude/audit-reports/java-release/YYYY/MM/DD/`, then use `compare` or `trend` to analyze quality changes.
+
+## Stop conditions
+
+If P0 issues are found or evidence is insufficient to judge release risk, do not conclude “release is acceptable”; output blockers or a “needs further verification” list.
