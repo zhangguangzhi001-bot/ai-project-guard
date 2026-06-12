@@ -1,10 +1,16 @@
 import path from 'node:path'
-import type { ProjectProfile } from '../schemas/project-profile.js'
+import type { GovernancePackId, ProjectProfile } from '../schemas/project-profile.js'
+import type { GeneratedLanguage } from '../schemas/template-context.js'
 import { toTemplateContext } from '../schemas/template-context.js'
 import { renderTemplate, resolveTemplateRoot } from './template-renderer.js'
 import type { WritePlan } from './write-plan.js'
 
-const TEMPLATE_FILES: Array<{ template: string; output: string }> = [
+interface TemplateFileMapping {
+  template: string
+  output: string
+}
+
+const BASE_TEMPLATE_FILES: TemplateFileMapping[] = [
   { template: 'CLAUDE.md.hbs', output: 'CLAUDE.md' },
   { template: 'CLAUDE.architecture.md.hbs', output: 'CLAUDE.architecture.md' },
   { template: 'CLAUDE.lessons.md.hbs', output: 'CLAUDE.lessons.md' },
@@ -60,12 +66,45 @@ const TEMPLATE_FILES: Array<{ template: string; output: string }> = [
   },
 ]
 
-export async function generateClaudeCodePlan(profile: ProjectProfile): Promise<WritePlan> {
-  const templateRoot = await resolveTemplateRoot()
-  const context = toTemplateContext(profile)
+const PACK_TEMPLATE_FILES: Record<GovernancePackId, TemplateFileMapping[]> = {
+  'java-release-audit': [
+    {
+      template: 'commands/apg-java-release-audit.md.hbs',
+      output: '.claude/commands/apg-java-release-audit.md',
+    },
+    {
+      template: 'agents/apg-java-risk-module-auditor.md.hbs',
+      output: '.claude/agents/apg-java-risk-module-auditor.md',
+    },
+    {
+      template: 'agents/apg-financial-release-auditor.md.hbs',
+      output: '.claude/agents/apg-financial-release-auditor.md',
+    },
+    {
+      template: 'agents/apg-release-blocker-judge.md.hbs',
+      output: '.claude/agents/apg-release-blocker-judge.md',
+    },
+    {
+      template: 'workflows/apg-workflow-java-release-audit.md.hbs',
+      output: '.claude/workflows/apg-workflow-java-release-audit.md',
+    },
+  ],
+}
+
+export interface GenerateClaudeCodePlanOptions {
+  language?: GeneratedLanguage
+}
+
+export async function generateClaudeCodePlan(
+  profile: ProjectProfile,
+  options: GenerateClaudeCodePlanOptions = {},
+): Promise<WritePlan> {
+  const language = options.language ?? 'zh'
+  const templateRoot = await resolveTemplateRoot(language)
+  const context = toTemplateContext(profile, { language })
   const files = []
 
-  for (const mapping of TEMPLATE_FILES) {
+  for (const mapping of resolveTemplateFiles(profile)) {
     const content = await renderTemplate(path.join(templateRoot, mapping.template), context)
     files.push({ relativePath: mapping.output, content })
   }
@@ -73,4 +112,21 @@ export async function generateClaudeCodePlan(profile: ProjectProfile): Promise<W
   return { files }
 }
 
-export const CLAUDE_CODE_OUTPUT_FILES = TEMPLATE_FILES.map((mapping) => mapping.output)
+function resolveTemplateFiles(profile: ProjectProfile): TemplateFileMapping[] {
+  const packIds = new Set(profile.suggestedPacks?.map((pack) => pack.id) ?? [])
+  return [
+    ...BASE_TEMPLATE_FILES,
+    ...[...packIds].flatMap((packId) => PACK_TEMPLATE_FILES[packId] ?? []),
+  ]
+}
+
+export const CLAUDE_CODE_BASE_OUTPUT_FILES = BASE_TEMPLATE_FILES.map((mapping) => mapping.output)
+
+export const CLAUDE_CODE_PACK_OUTPUT_FILES: Record<GovernancePackId, string[]> = {
+  'java-release-audit': PACK_TEMPLATE_FILES['java-release-audit'].map((mapping) => mapping.output),
+}
+
+export const CLAUDE_CODE_OUTPUT_FILES = [
+  ...CLAUDE_CODE_BASE_OUTPUT_FILES,
+  ...Object.values(CLAUDE_CODE_PACK_OUTPUT_FILES).flat(),
+]

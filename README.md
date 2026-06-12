@@ -43,6 +43,82 @@ If the preview looks correct, run the real initialization:
 npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code
 ```
 
+#### CLI command reference
+
+Current implemented command:
+
+```bash
+ai-project-guard init [options]
+```
+
+`init` scans the target project locally, builds a project profile, and generates Claude Code governance files. It does not modify business source code.
+
+| Option | When to use it | Example |
+|--------|----------------|---------|
+| `--profile claude-code` | Required profile for v0.1. Other profiles are planned but not implemented yet. | `init --profile claude-code` |
+| `--output <dir>` | Initialize a project directory other than the current working directory. | `init --profile claude-code --output ../legacy-app` |
+| `--dry-run` | First run, CI preview, or whenever you want to inspect generated paths before writing. | `init --profile claude-code --dry-run` |
+| `--force` | Regenerate APG governance files after reviewing conflicts. Use carefully; it overwrites existing generated governance files. | `init --profile claude-code --force` |
+| `--answers <file>` | Repeatable non-interactive setup with a reviewed JSON profile. Best for teams and CI. | `init --profile claude-code --answers ./answers.json` |
+| `--language zh` | Generate Chinese Markdown. This is the default. | `init --profile claude-code --language zh` |
+| `--language en` | Generate English Markdown. | `init --profile claude-code --language en` |
+| `--interactive` | Auto-scan first, then answer a short questionnaire to supplement missing context. | `init --profile claude-code --interactive` |
+| `--full` | Use when initializing important legacy systems and you want to capture full architecture, contracts, risks, tests, and local context. | `init --profile claude-code --full` |
+| `--no-scan` | Skip lightweight local scanning and generate TODO-based starter governance files. Use for empty projects or when scanning is not desired. | `init --profile claude-code --no-scan` |
+
+Common scenarios:
+
+```bash
+# Safest first run: preview only
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --dry-run
+
+# Generate governance files in the current project after reviewing dry-run output
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code
+
+# Generate English governance files
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --language en
+
+# Initialize a different target project from outside that project
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --output ../legacy-java-system --dry-run
+
+# Team/CI-friendly initialization from an answers file
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --answers ./answers.json --dry-run
+
+# Regenerate after reviewing existing-file conflicts
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --force
+```
+
+#### Generated Claude Code command usage
+
+After initialization, use the generated slash commands inside Claude Code:
+
+| Command | Best scenario |
+|---------|---------------|
+| `/apg-daily-start` | Start a work session by reading project governance context first. |
+| `/apg-daily-review` | End-of-day review: summarize changes, risks, lessons, and follow-ups. |
+| `/apg-diagnose` | Unknown bug or unclear failure; diagnose before editing. |
+| `/apg-quick-bugfix` | Low-risk, focused bug fix outside dangerous modules and contracts. |
+| `/apg-risky-plan` | Any Tier 2/Tier 3 work: API/data contracts, dangerous modules, migrations, auth, external systems, state machines. |
+| `/apg-verify` | Run or plan focused verification using the project’s real build/test commands. |
+| `/apg-requirement-clarify` | Turn vague product or business requests into explicit requirements before coding. |
+
+For Java/Maven/Gradle projects, APG also generates `/apg-java-release-audit` and related audit agents/workflow.
+
+Common Java audit examples:
+
+```text
+/apg-java-release-audit round1
+/apg-java-release-audit round2
+/apg-java-release-audit round3
+/apg-java-release-audit round4
+/apg-java-release-audit round5
+/apg-java-release-audit archive
+/apg-java-release-audit compare 2026-06-01 2026-06-12
+/apg-java-release-audit trend 2026-06-01 2026-06-12
+```
+
+Use `round1` first for large vendor systems: it builds the risk map before making a release judgment. Use `round4` only after enough evidence exists. Use `archive`, `compare`, and `trend` when you want dated audit reports and quality trend analysis.
+
 #### Non-interactive initialization
 
 Use this when you want stable, repeatable output:
@@ -93,7 +169,9 @@ The plugin does not replace the CLI. It gives Claude Code workflow guidance for 
 
 ### Generated files
 
-The Claude Code profile generates:
+The Claude Code profile is project-aware. It always generates the base governance files, then adds optional governance packs when local scan evidence matches the current project.
+
+Base files:
 
 ```text
 CLAUDE.md
@@ -119,6 +197,16 @@ CLAUDE.local.md
 .claude/workflows/apg-workflow-new-feature.md
 .claude/workflows/apg-workflow-dangerous-module.md
 .claude/workflows/apg-workflow-requirement-clarify.md
+```
+
+Java release-audit pack, generated only when Java/Maven/Gradle evidence is detected:
+
+```text
+.claude/commands/apg-java-release-audit.md
+.claude/agents/apg-java-risk-module-auditor.md
+.claude/agents/apg-financial-release-auditor.md
+.claude/agents/apg-release-blocker-judge.md
+.claude/workflows/apg-workflow-java-release-audit.md
 ```
 
 ### Skills
@@ -223,6 +311,82 @@ npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --dr
 npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code
 ```
 
+#### CLI 命令使用手册
+
+当前已实现命令：
+
+```bash
+ai-project-guard init [options]
+```
+
+`init` 会在本地扫描目标项目，生成项目画像，并输出 Claude Code 治理文件。它不会修改业务源码。
+
+| 参数 | 适用场景 | 示例 |
+|------|----------|------|
+| `--profile claude-code` | v0.1 必传/默认使用的生成 profile。其他 profile 仍是规划能力。 | `init --profile claude-code` |
+| `--output <dir>` | 初始化当前目录之外的目标项目。 | `init --profile claude-code --output ../legacy-app` |
+| `--dry-run` | 第一次使用、CI 预览、写入前确认文件清单。不会写文件。 | `init --profile claude-code --dry-run` |
+| `--force` | 已确认冲突文件可以覆盖后再使用。会覆盖已有生成治理文件，需谨慎。 | `init --profile claude-code --force` |
+| `--answers <file>` | 团队/CI/批量项目使用，基于已审核的 JSON 答案文件稳定生成。 | `init --profile claude-code --answers ./answers.json` |
+| `--language zh` | 生成中文 Markdown。默认值。 | `init --profile claude-code --language zh` |
+| `--language en` | 生成英文 Markdown。 | `init --profile claude-code --language en` |
+| `--interactive` | 先自动扫描，再用短问卷补充关键上下文。 | `init --profile claude-code --interactive` |
+| `--full` | 初始化重要存量系统时使用，完整确认架构、契约、风险、测试、本地上下文。 | `init --profile claude-code --full` |
+| `--no-scan` | 不做轻量扫描，只生成带 TODO 的起始治理文件。适合空项目或不希望扫描的场景。 | `init --profile claude-code --no-scan` |
+
+常见场景：
+
+```bash
+# 第一次使用：只预览，不写入
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --dry-run
+
+# 确认 dry-run 结果后，在当前项目生成治理文件
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code
+
+# 生成英文治理文件
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --language en
+
+# 从外部目录初始化某个目标项目
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --output ../legacy-java-system --dry-run
+
+# 团队/CI 使用答案文件稳定生成
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --answers ./answers.json --dry-run
+
+# 已确认冲突文件可以覆盖后重新生成
+npx github:zhangguangzhi001-bot/ai-project-guard init --profile claude-code --force
+```
+
+#### 生成后的 Claude Code 命令怎么用
+
+初始化后，在 Claude Code 中可以使用生成的 slash commands：
+
+| 命令 | 适用场景 |
+|------|----------|
+| `/apg-daily-start` | 每天开始工作前，先读取项目治理上下文。 |
+| `/apg-daily-review` | 每天结束时，总结变更、风险、经验和后续事项。 |
+| `/apg-diagnose` | 问题原因不明时，先诊断再决定是否修改。 |
+| `/apg-quick-bugfix` | 低风险、聚焦 bugfix，不涉及危险模块和契约。 |
+| `/apg-risky-plan` | Tier 2/Tier 3 工作：API/数据契约、危险模块、migration、认证、外部系统、状态机等。 |
+| `/apg-verify` | 使用项目真实构建/测试命令做聚焦验证。 |
+| `/apg-requirement-clarify` | 需求不清晰时，先澄清业务规则和验收标准。 |
+
+如果检测到 Java / Maven / Gradle 项目，还会生成 `/apg-java-release-audit` 以及配套审计 agents/workflow。
+
+Java 上线审计常见用法：
+
+```text
+/apg-java-release-audit round1
+/apg-java-release-audit round2
+/apg-java-release-audit round3
+/apg-java-release-audit round4
+/apg-java-release-audit round5
+/apg-java-release-audit archive
+/apg-java-release-audit compare 2026-06-01 2026-06-12
+/apg-java-release-audit trend 2026-06-01 2026-06-12
+```
+
+大型供应商系统建议先用 `round1` 画风险地图，不要急着下上线结论；证据充分后再用 `round4` 做上线门禁判断。需要按年月日沉淀报告并做质量趋势时，使用 `archive`、`compare`、`trend`。
+
 #### 非交互初始化
 
 如果你希望输出稳定、可重复，可以准备一个 `answers.json`：
@@ -273,7 +437,9 @@ Claude Code 用户也可以安装配套插件：
 
 ### 生成文件
 
-Claude Code profile 会生成：
+Claude Code profile 会根据当前项目自动生成治理文件。所有项目都会生成基础治理文件；如果本地扫描发现 Java / Maven / Gradle 证据，则额外生成 Java 上线审计治理包。
+
+基础文件：
 
 ```text
 CLAUDE.md
@@ -299,6 +465,16 @@ CLAUDE.local.md
 .claude/workflows/apg-workflow-new-feature.md
 .claude/workflows/apg-workflow-dangerous-module.md
 .claude/workflows/apg-workflow-requirement-clarify.md
+```
+
+Java 上线审计治理包，仅在检测到 Java / Maven / Gradle 证据时生成：
+
+```text
+.claude/commands/apg-java-release-audit.md
+.claude/agents/apg-java-risk-module-auditor.md
+.claude/agents/apg-financial-release-auditor.md
+.claude/agents/apg-release-blocker-judge.md
+.claude/workflows/apg-workflow-java-release-audit.md
 ```
 
 ### Skills

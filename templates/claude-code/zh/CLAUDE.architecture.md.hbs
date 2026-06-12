@@ -1,0 +1,61 @@
+# CLAUDE.architecture.md
+
+{{projectName}} 的稳定架构上下文。
+
+## 系统架构
+
+{{projectSummary}}
+
+## 运行入口
+
+{{list architecture.runtimeEntryPoints}}
+
+## 核心业务流程
+
+{{architecture.coreBusinessFlow}}
+
+## 当前主链路
+
+{{architecture.mainPath}}
+
+## Legacy / 兼容链路
+
+{{architecture.legacyPath}}
+
+## 模块边界
+
+{{list architecture.moduleBoundaries}}
+
+## 外部系统
+
+{{list architecture.externalSystems}}
+
+## 数据与 API 契约
+
+- API：{{inlineList contracts.apiContracts}}
+- 状态：{{inlineList contracts.statusContracts}}
+- Schema：{{inlineList contracts.schemaContracts}}
+- 前端：{{inlineList contracts.frontendContracts}}
+- 外部系统：{{inlineList contracts.externalContracts}}
+
+## 危险模块
+
+{{list risks.dangerousModules}}
+
+## 历史兼容层
+
+{{list risks.legacyModules}}
+
+## 不应随意跨越的边界
+
+{{list architecture.moduleBoundaries}}
+
+## AI 容易误改的区域
+
+- 仍有隐藏调用方的 legacy / deprecated 模块。
+- 被数据库、后端、前端、测试共同依赖的状态字符串或 API 包络。
+- 手写 SQL、migration、生成类型、外部系统兼容逻辑。
+
+## 必须人工 Review 的区域
+
+{{list risks.humanReviewRequired}}

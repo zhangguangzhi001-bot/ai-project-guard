@@ -31,7 +31,7 @@ describe('loadProjectProfileFromAnswers', () => {
       'utf8',
     )
 
-    const profile = await loadProjectProfileFromAnswers(tempDir, answersPath)
+    const profile = await loadProjectProfileFromAnswers(tempDir, answersPath, { language: 'en' })
 
     expect(profile.projectName).toBe('Legacy Shop')
     expect(profile.risks.dangerousModules).toEqual(['src/auth'])

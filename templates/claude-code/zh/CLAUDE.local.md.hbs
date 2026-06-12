@@ -1,0 +1,31 @@
+# CLAUDE.local.md
+
+{{projectName}} 的当前分支 / 当前迭代临时上下文。不要把本文件当作永久架构事实。
+
+## 当前分支
+
+{{localContext.currentBranch}}
+
+## 当前重点
+
+{{localContext.currentFocus}}
+
+## 临时约束
+
+{{list localContext.temporaryConstraints}}
+
+## 当前禁止修改区域
+
+{{list localContext.currentForbiddenAreas}}
+
+## 当前验证规则
+
+{{list tests.verificationRules}}
+
+## 当前需要人工 Review
+
+{{list risks.humanReviewRequired}}
+
+## 备注
+
+当分支目标、禁止区域或发布风险变化时，请刷新本文件。

@@ -1,9 +1,18 @@
 export type Confidence = 'high' | 'medium' | 'low'
 
+export type GovernancePackId = 'java-release-audit'
+
 export interface StackInfo {
   area: 'backend' | 'frontend' | 'database' | 'infra' | 'unknown'
   name: string
   confidence: Confidence
+  evidence: string[]
+}
+
+export interface GovernancePackSuggestion {
+  id: GovernancePackId
+  confidence: Confidence
+  reason: string
   evidence: string[]
 }
 
@@ -56,4 +65,5 @@ export interface ProjectProfile {
   risks: RiskProfile
   tests: TestProfile
   localContext: LocalContextProfile
+  suggestedPacks?: GovernancePackSuggestion[]
 }

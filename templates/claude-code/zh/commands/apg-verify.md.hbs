@@ -1,0 +1,21 @@
+# /apg-verify
+
+## 目的
+
+对 {{projectName}} 运行聚焦验证。
+
+## 命令
+
+构建 / 类型检查 / Lint：
+
+{{list tests.buildCommands}}
+
+测试：
+
+{{list tests.testCommands}}
+
+## 规则
+
+- 说明每个命令证明了什么。
+- 不要把占位测试当作安全证明：{{inlineList tests.invalidOrPlaceholderTests}}。
+- 如果无法运行验证，说明原因和需要的人工检查。

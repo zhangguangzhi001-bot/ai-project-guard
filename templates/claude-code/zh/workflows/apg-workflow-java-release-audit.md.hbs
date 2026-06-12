@@ -1,0 +1,45 @@
+# apg-workflow-java-release-audit
+
+用于 Java / Spring / Maven / Gradle 项目的上线前质量审计。
+
+## 入口命令
+
+优先使用：`/apg-java-release-audit`
+
+## 推荐分阶段流程
+
+1. `round1`：项目体检和风险地图
+   - 识别技术栈、分层结构、核心业务链路、高风险模块。
+2. `round2`：高风险模块专项审计
+   - 可调用 `apg-java-risk-module-auditor`。
+   - 聚焦 Controller、Service、Mapper、事务、权限、文件上传、定时任务、外部接口。
+3. `round3`：金融系统专项审计
+   - 可调用 `apg-financial-release-auditor`。
+   - 聚焦金额精度、幂等、状态机、审计日志、权限、数据一致性。
+4. `round4`：上线阻断判断
+   - 可调用 `apg-release-blocker-judge`。
+   - 基于证据输出 Go / No-Go 和最小整改清单。
+5. `round5`：供应商整改清单
+   - 整理正式整改要求和验收标准。
+
+## 当前危险模块
+
+{{list risks.dangerousModules}}
+
+## 当前验证命令
+
+构建 / 类型检查 / Lint：
+
+{{list tests.buildCommands}}
+
+测试：
+
+{{list tests.testCommands}}
+
+## 报告归档
+
+如需要形成趋势，使用 `/apg-java-release-audit archive` 将报告保存到 `.claude/audit-reports/java-release/YYYY/MM/DD/`，再用 `compare` 或 `trend` 分析质量变化。
+
+## 停止条件
+
+发现 P0 或证据不足以判断上线风险时，不要给出“可以上线”的结论；应输出阻断项或“需要进一步验证”的清单。
