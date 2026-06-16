@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { mergeExistingClaudeMd } from '../generators/claude-merge.js'
 import { generateClaudeCodePlan as defaultGenerateClaudeCodePlan } from '../generators/index.js'
 import type { WritePlan } from '../generators/write-plan.js'
 import {
@@ -10,8 +11,11 @@ import { createScannedProjectProfile } from '../scanners/light-scan.js'
 import type { ProjectProfile } from '../schemas/project-profile.js'
 import { normalizeGeneratedLanguage, type GeneratedLanguage } from '../schemas/template-context.js'
 import {
-  findConflicts as defaultFindConflicts,
+  analyzeWritePlan as defaultAnalyzeWritePlan,
   writePlan as defaultWritePlan,
+  type MergeHandler,
+  type WritePlanAnalysis,
+  type WriteResult,
 } from '../utils/fs.js'
 import { logger } from '../utils/logger.js'
 
@@ -33,12 +37,16 @@ export interface InitDependencies {
     profile: ProjectProfile,
     options?: { language?: GeneratedLanguage },
   ) => Promise<WritePlan>
-  findConflicts?: (outputDir: string, plan: WritePlan) => Promise<string[]>
+  analyzeWritePlan?: (
+    outputDir: string,
+    plan: WritePlan,
+    options: { force: boolean; mergeHandlers?: MergeHandler[] },
+  ) => Promise<WritePlanAnalysis>
   writePlan?: (
     outputDir: string,
     plan: WritePlan,
-    options: { force: boolean },
-  ) => Promise<{ written: string[]; conflicts: string[] }>
+    options: { force: boolean; mergeHandlers?: MergeHandler[] },
+  ) => Promise<WriteResult>
 }
 
 export async function runInitCommand(
@@ -54,39 +62,54 @@ export async function runInitCommand(
   const collectProjectProfile = dependencies.collectProjectProfile ?? defaultCollectProjectProfile
   const generateClaudeCodePlan =
     dependencies.generateClaudeCodePlan ?? defaultGenerateClaudeCodePlan
-  const findConflicts = dependencies.findConflicts ?? defaultFindConflicts
+  const analyzeWritePlan = dependencies.analyzeWritePlan ?? defaultAnalyzeWritePlan
   const persistWritePlan = dependencies.writePlan ?? defaultWritePlan
 
   const language = normalizeGeneratedLanguage(options.language)
   const outputDir = path.resolve(options.output)
   const profile = await resolveProfile(outputDir, options, language, collectProjectProfile)
   const plan = await generateClaudeCodePlan(profile, { language })
+  const mergeHandlers = createMergeHandlers(language)
 
   if (options.dryRun) {
-    const conflicts = await findConflicts(outputDir, plan)
+    const analysis = await analyzeWritePlan(outputDir, plan, {
+      force: options.force,
+      mergeHandlers,
+    })
     printDryRun(
       outputDir,
       language,
       profile.suggestedPacks?.map((pack) => `${pack.id} (${pack.confidence})`) ?? [],
       plan.files.map((file) => file.relativePath),
-      conflicts,
+      analysis,
     )
     return
   }
 
-  const result = await persistWritePlan(outputDir, plan, { force: options.force })
+  const result = await persistWritePlan(outputDir, plan, {
+    force: options.force,
+    mergeHandlers,
+  })
 
-  if (result.conflicts.length > 0 && !options.force) {
+  if (result.blocked.length > 0) {
     logger.error('Refusing to overwrite existing governance files.')
     logger.info('Existing files:')
-    logger.list(result.conflicts)
-    logger.info('Re-run with --force to overwrite these generated governance files.')
+    logger.list(result.blocked)
+    logger.info('Existing CLAUDE.md can be merged automatically. Other existing governance files require --force or manual resolution.')
     process.exitCode = 1
     return
   }
 
   logger.success(`Generated ${result.written.length} governance files in ${outputDir}`)
   logger.list(result.written)
+  if (result.merged.length > 0) {
+    logger.info('Merged existing files:')
+    logger.list(result.merged)
+  }
+  if (result.backups.length > 0) {
+    logger.info('Backups created:')
+    logger.list(result.backups)
+  }
 }
 
 async function resolveProfile(
@@ -110,12 +133,22 @@ async function resolveProfile(
   return createScannedProjectProfile(outputDir, { language })
 }
 
+function createMergeHandlers(language: GeneratedLanguage): MergeHandler[] {
+  return [
+    {
+      relativePath: 'CLAUDE.md',
+      merge: (existingContent, generatedContent) =>
+        mergeExistingClaudeMd(generatedContent, existingContent, { language }),
+    },
+  ]
+}
+
 function printDryRun(
   outputDir: string,
   language: GeneratedLanguage,
   suggestedPacks: string[],
   files: string[],
-  conflicts: string[],
+  analysis: WritePlanAnalysis,
 ): void {
   logger.info('AI Project Guard dry run')
   logger.info('')
@@ -134,8 +167,29 @@ function printDryRun(
   logger.list(files)
   logger.info('')
   logger.info('Conflicts:')
-  if (conflicts.length > 0) {
-    logger.list(conflicts)
+  if (analysis.conflicts.length > 0) {
+    logger.list(analysis.conflicts)
+  } else {
+    logger.info('- none')
+  }
+  logger.info('')
+  logger.info('Would merge:')
+  if (analysis.mergeable.length > 0) {
+    logger.list(analysis.mergeable)
+  } else {
+    logger.info('- none')
+  }
+  logger.info('')
+  logger.info('Would create backups:')
+  if (analysis.backups.length > 0) {
+    logger.list(analysis.backups)
+  } else {
+    logger.info('- none')
+  }
+  logger.info('')
+  logger.info('Blocking conflicts:')
+  if (analysis.blocked.length > 0) {
+    logger.list(analysis.blocked)
   } else {
     logger.info('- none')
   }
